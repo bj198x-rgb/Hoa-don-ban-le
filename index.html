@@ -8,80 +8,130 @@
 <meta name="apple-mobile-web-app-title" content="Hóa đơn lẻ">
 <title>AN MAITRI – Bảng kê hóa đơn</title>
 <style>
-  :root { --g:#356854; --g2:#2a5443; --bg:#f3f6f4; --card:#fff; --line:#dfe6e2; --tx:#1d2b25; --mut:#6b7a73; --warn:#c2410c; --ok:#15803d; --bad:#b91c1c; }
+  :root { --g:#356854; --g1:#4a8a70; --g2:#2a5443; --gd:#1f4535; --bg:#eef3f0; --card:#fff; --line:#dbe4df; --tx:#1d2b25; --mut:#667770; --warn:#c2410c; --ok:#15803d; --bad:#b91c1c; --amber:#d97706; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { margin:0; background:var(--bg); color:var(--tx); font:15px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif; }
-  header { position:sticky; top:0; z-index:5; background:var(--g); color:#fff; padding:calc(10px + env(safe-area-inset-top)) 14px 10px; display:flex; align-items:center; justify-content:space-between; }
-  header h1 { font-size:16px; margin:0; font-weight:600; }
-  header small { display:block; opacity:.8; font-weight:400; font-size:12px; }
-  .icon { background:none; border:0; color:#fff; font-size:22px; padding:4px 8px; }
-  main { padding:12px 12px 110px; max-width:720px; margin:0 auto; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px; }
-  .card h2 { font-size:13px; margin:0 0 8px; color:var(--mut); text-transform:uppercase; letter-spacing:.04em; }
-  label { display:block; font-size:12px; color:var(--mut); margin:8px 0 3px; }
-  input,select,textarea { width:100%; font:inherit; padding:10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--tx); }
-  input:focus,select:focus { outline:2px solid var(--g); border-color:var(--g); }
-  .row { display:flex; gap:8px; align-items:center; }
+  html,body { margin:0; background:var(--bg); color:var(--tx); font:16px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif; -webkit-text-size-adjust:100%; }
+  header { position:sticky; top:0; z-index:5; background:linear-gradient(135deg,#3f7a63,#2a5443); color:#fff; padding:calc(12px + env(safe-area-inset-top)) 16px 14px; display:flex; align-items:center; justify-content:space-between; border-radius:0 0 22px 22px; box-shadow:0 6px 16px rgba(31,69,53,.35); }
+  header h1 { font-size:18px; margin:0; font-weight:700; letter-spacing:.01em; }
+  header small { display:block; opacity:.85; font-weight:400; font-size:12px; margin-top:2px; }
+  .icon { width:44px; height:44px; border-radius:50%; border:0; color:#fff; font-size:21px; background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.12)); box-shadow:0 3px 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.4); transition:transform .08s, box-shadow .08s; }
+  .icon:active { transform:translateY(3px); box-shadow:0 0 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3); }
+  main { padding:16px 12px 170px; max-width:720px; margin:0 auto; }
+  .card { background:var(--card); border-radius:20px; padding:14px; margin-bottom:14px; box-shadow:0 2px 0 #d5dfda, 0 8px 20px rgba(31,69,53,.08); }
+  .card h2 { display:flex; align-items:center; gap:8px; font-size:14px; margin:0 0 10px; color:var(--g2); font-weight:700; letter-spacing:.02em; }
+  .card h2 i { font-style:normal; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--g); color:#fff; font-size:13px; box-shadow:0 2px 0 var(--gd); }
+  label { display:block; font-size:12px; color:var(--mut); margin:10px 0 4px; font-weight:600; }
+  input,select,textarea { width:100%; font:inherit; font-size:16px; min-height:46px; padding:10px 12px; border:1.5px solid var(--line); border-radius:14px; background:#fbfdfc; color:var(--tx); box-shadow:inset 0 2px 3px rgba(0,0,0,.04); }
+  input[type=checkbox] { min-height:0; width:auto; box-shadow:none; }
+  input:focus,select:focus,textarea:focus { outline:0; border-color:var(--g); box-shadow:0 0 0 3px rgba(53,104,84,.2); background:#fff; }
+  .row { display:flex; gap:10px; align-items:center; }
   .row > * { flex:1; min-width:0; }
-  .chips { display:flex; flex-wrap:wrap; gap:8px; }
-  .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:8px 14px; font:inherit; color:var(--tx); }
-  .chip.on { background:var(--g); border-color:var(--g); color:#fff; }
-  .btn { border:0; border-radius:10px; padding:12px 14px; font:inherit; font-weight:600; background:var(--g); color:#fff; width:100%; }
-  .btn.sec { background:#e6efe9; color:var(--g2); }
-  .btn.sm { padding:8px 10px; font-size:13px; width:auto; }
-  .btn:disabled { opacity:.5; }
-  .hint { font-size:12px; color:var(--mut); margin-top:6px; }
-  .ord { border:1px solid var(--line); border-radius:12px; background:#fff; margin-bottom:10px; overflow:hidden; }
-  .ord.off { opacity:.55; }
-  .ord.done { background:#eef6f0; }
-  .oh { display:flex; gap:10px; padding:10px 12px; align-items:flex-start; }
-  .oh input[type=checkbox] { width:22px; height:22px; margin-top:2px; flex:none; accent-color:var(--g); }
+
+  /* ===== Nút bo tròn, nổi 3D ===== */
+  .btn { display:block; border:0; border-radius:999px; padding:14px 18px; margin:0 0 6px; font:inherit; font-weight:700; color:#fff; width:100%; text-align:center; text-decoration:none; cursor:pointer;
+    background:linear-gradient(180deg,var(--g1),var(--g)); box-shadow:0 5px 0 var(--gd), 0 9px 14px rgba(31,69,53,.3), inset 0 1px 0 rgba(255,255,255,.35); text-shadow:0 1px 0 rgba(0,0,0,.2);
+    transition:transform .08s, box-shadow .08s; position:relative; }
+  .btn:active:not(:disabled) { transform:translateY(4px); box-shadow:0 1px 0 var(--gd), 0 3px 5px rgba(31,69,53,.3), inset 0 1px 0 rgba(255,255,255,.25); }
+  .btn.sec { background:linear-gradient(180deg,#fafdfb,#dbeae1); color:var(--g2); text-shadow:none; box-shadow:0 5px 0 #b3cbbd, 0 9px 14px rgba(0,0,0,.1), inset 0 1px 0 #fff; }
+  .btn.sec:active:not(:disabled) { box-shadow:0 1px 0 #b3cbbd, 0 3px 5px rgba(0,0,0,.1), inset 0 1px 0 #fff; }
+  .btn.big { padding:16px 18px; font-size:17px; }
+  .btn.sm { padding:10px 16px; font-size:14px; width:auto; box-shadow:0 4px 0 var(--gd), 0 7px 11px rgba(31,69,53,.28), inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn.sm.sec { box-shadow:0 4px 0 #b3cbbd, 0 7px 11px rgba(0,0,0,.1), inset 0 1px 0 #fff; }
+  .btn:disabled { background:linear-gradient(180deg,#c9d3ce,#b4c0ba); box-shadow:0 4px 0 #94a39b; color:#eef3f0; text-shadow:none; }
+  .btnrow { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .btnrow .btn { padding:13px 8px; font-size:15px; margin:0 0 5px; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .hint { font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .hint a, .link { color:var(--g); font-weight:600; background:none; border:0; padding:0; font:inherit; text-decoration:underline; }
+
+  /* ===== Các tab nguồn ===== */
+  .tabs { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-bottom:4px; }
+  .tabbtn { border:2px solid var(--line); border-radius:18px; padding:10px 10px 11px; font:inherit; text-align:left; color:var(--tx); background:linear-gradient(180deg,#fff,#f1f5f3); min-height:62px; position:relative;
+    box-shadow:0 4px 0 #cfdad4, 0 8px 12px rgba(0,0,0,.07); transition:transform .08s, box-shadow .08s; }
+  .tabbtn:active { transform:translateY(3px); box-shadow:0 1px 0 #cfdad4; }
+  .tabbtn b { display:block; font-size:16px; }
+  .tabbtn small { display:block; font-size:12px; color:var(--mut); margin-top:2px; }
+  .tabbtn.loaded { border-color:var(--g); background:linear-gradient(180deg,#fff,#e6f1ea); box-shadow:0 4px 0 #9bbcab, 0 8px 12px rgba(0,0,0,.07); }
+  .tabbtn.loaded small { color:var(--g2); }
+  .tabbtn.part { border-color:#f2b14d; background:linear-gradient(180deg,#fffaf0,#ffefcf); box-shadow:0 4px 0 #e6c27d, 0 8px 12px rgba(0,0,0,.07); }
+  .tabbtn.part small { color:#9a5b05; font-weight:600; }
+  .tabbtn.done { border-color:var(--gd); background:linear-gradient(180deg,var(--g1),var(--g)); color:#fff; box-shadow:0 4px 0 var(--gd), 0 8px 12px rgba(31,69,53,.3); }
+  .tabbtn.done small { color:#e5f4ec; font-weight:600; }
+  .tabbtn.done::after { content:"✓"; position:absolute; right:10px; top:8px; width:24px; height:24px; border-radius:50%; background:#fff; color:var(--g); font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 0 rgba(0,0,0,.2); }
+  .tabbtn.done:active { box-shadow:0 1px 0 var(--gd); }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:var(--mut); margin-top:10px; }
+  .legend span::before { content:""; display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.15); }
+  .legend .l1::before { background:var(--g); } .legend .l2::before { background:#ffd27d; } .legend .l3::before { background:#cfe6d8; }
+
+  /* ===== Chip (modal tồn kho) ===== */
+  .chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chip { border:0; background:linear-gradient(180deg,#fff,#eef3f0); border-radius:999px; padding:9px 18px; font:inherit; font-weight:600; color:var(--tx); box-shadow:0 4px 0 #cbd7d1, 0 7px 10px rgba(0,0,0,.08); transition:transform .08s, box-shadow .08s; }
+  .chip:active { transform:translateY(3px); box-shadow:0 1px 0 #cbd7d1; }
+  .chip.on { background:linear-gradient(180deg,var(--g1),var(--g)); color:#fff; box-shadow:0 4px 0 var(--gd), 0 7px 10px rgba(31,69,53,.3); }
+
+  /* ===== Đơn ===== */
+  .ord { border-radius:18px; background:#fff; margin-bottom:14px; overflow:hidden; border:1.5px solid var(--line); border-left:6px solid var(--g1); box-shadow:0 3px 0 #d5dfda, 0 8px 16px rgba(31,69,53,.07); }
+  .ord.warn { border-left-color:var(--amber); } .ord.bad { border-left-color:var(--bad); }
+  .ord.off { opacity:.6; border-left-color:#b6c2bb; }
+  .ord.done { background:#eef6f0; border-left-color:#7bb394; }
+  .oh { display:flex; gap:12px; padding:12px; align-items:flex-start; }
+  .oh input[type=checkbox] { appearance:none; -webkit-appearance:none; width:28px; height:28px; margin:2px 0 0; flex:none; border-radius:9px; border:2px solid #9db3a8; background:#fff; box-shadow:0 3px 0 #c5d3cb; position:relative; }
+  .oh input[type=checkbox]:checked { background:var(--g); border-color:var(--gd); box-shadow:0 3px 0 var(--gd); }
+  .oh input[type=checkbox]:checked::after { content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:17px; }
+  .oh input[type=checkbox]:disabled { opacity:.45; }
   .oh .t { flex:1; min-width:0; }
-  .oh .n { font-weight:600; }
-  .oh .p { color:var(--mut); font-size:13px; }
-  .oh .sum { font-size:13px; margin-top:4px; white-space:pre-line; }
-  .tag { display:inline-block; font-size:11px; padding:2px 7px; border-radius:999px; background:#eef1ef; color:var(--mut); margin-left:4px; }
+  .oh .n { font-weight:700; font-size:17px; }
+  .oh .p { color:var(--mut); font-size:13px; margin-top:1px; }
+  .oh .chev { flex:none; width:36px; height:36px; border-radius:50%; background:#e6efe9; color:var(--g2); display:flex; align-items:center; justify-content:center; font-size:13px; box-shadow:0 3px 0 #c3d4ca; }
+  .tag { display:inline-block; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:999px; background:#eef1ef; color:var(--mut); margin:2px 4px 2px 0; }
   .tag.warn { background:#ffedd5; color:var(--warn); }
   .tag.ok { background:#dcfce7; color:var(--ok); }
   .tag.bad { background:#fee2e2; color:var(--bad); }
-  .od { border-top:1px dashed var(--line); padding:10px 12px 12px; background:#fafcfb; }
-  .info { font-size:13px; color:var(--mut); white-space:pre-line; margin-bottom:8px; }
-  .ln { border:1px solid var(--line); border-radius:10px; padding:8px; margin-bottom:8px; background:#fff; }
-  .ln.gift { background:#fff8ec; border-color:#f4d9a8; }
-  .ln select.guess { border-color:#f59e0b; background:#fffbeb; }
-  .ln .row { margin-top:6px; }
-  .ln .q { flex:0 0 72px; text-align:center; }
-  .ln .x { flex:none; width:40px; border:0; background:#fee2e2; color:var(--bad); border-radius:8px; height:40px; font-size:18px; }
-  .chk { font-size:13px; margin:6px 0; }
-  .bar { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); z-index:6; }
-  .bar .in { max-width:720px; margin:0 auto; }
-  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:20; display:none; align-items:flex-end; justify-content:center; }
-  .modal.show { display:flex; }
-  .sheet { background:#fff; width:100%; max-width:720px; border-radius:16px 16px 0 0; padding:16px 14px calc(16px + env(safe-area-inset-bottom)); max-height:90vh; overflow:auto; }
-  .sheet h3 { margin:0 0 6px; }
-  .toast { position:fixed; left:12px; right:12px; bottom:90px; background:#1f2937; color:#fff; padding:12px 14px; border-radius:10px; z-index:30; display:none; }
-  .toast.show { display:block; }
-  .cols { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:6px; font-size:13px; }
+  .od { border-top:2px dashed var(--line); padding:12px; background:#f8fbf9; }
+  .info { font-size:13px; color:var(--mut); white-space:pre-line; margin-bottom:10px; }
+  .ln { border-radius:16px; padding:10px; margin-bottom:12px; background:#fff; border:1.5px solid var(--line); box-shadow:0 3px 0 #dbe4df; }
+  .ln.gift { background:#fff8ec; border-color:#f4d9a8; box-shadow:0 3px 0 #ecd3a0; }
+  .ln .row { margin-top:8px; }
+  .ln .q { flex:0 0 84px; text-align:center; }
+  .ln .x { flex:none; width:46px; border:0; background:linear-gradient(180deg,#fff1f1,#fecaca); color:var(--bad); border-radius:50%; height:46px; font-size:18px; box-shadow:0 4px 0 #e5a3a3; }
+  .ln .x:active { transform:translateY(3px); box-shadow:0 1px 0 #e5a3a3; }
+  .chk { font-size:14px; margin:8px 0; display:flex; align-items:center; gap:8px; color:var(--tx); font-weight:500; }
+  .chk input { width:22px; height:22px; accent-color:var(--g); }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:8px; font-size:13.5px; }
   .cols > div { padding:2px 8px 2px 0; min-width:0; }
   .cols > div + div { border-left:2px solid #e3b9b9; padding-left:10px; }
-  .lab { font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--g); margin-bottom:2px; }
+  .lab { font-size:10.5px; font-weight:700; letter-spacing:.05em; color:var(--g); margin-bottom:3px; }
   .lab.r { color:#b91c1c; }
   .cols .real { white-space:pre-line; color:#7f1d1d; }
   .cb { position:relative; }
   .cbi.guess { border-color:#f59e0b; background:#fffbeb; }
-  .cbl { position:absolute; left:0; right:0; top:100%; z-index:15; background:#fff; border:1px solid var(--g); border-radius:8px; margin-top:2px; max-height:230px; overflow:auto; box-shadow:0 6px 18px rgba(0,0,0,.18); }
-  .cbo { padding:10px; border-bottom:1px solid #eef2f0; }
+  .cbl { position:absolute; left:0; right:0; top:100%; z-index:15; background:#fff; border:1.5px solid var(--g); border-radius:14px; margin-top:4px; max-height:240px; overflow:auto; box-shadow:0 10px 24px rgba(0,0,0,.22); }
+  .cbo { padding:12px; border-bottom:1px solid #eef2f0; }
   .cbo:last-child { border-bottom:0; }
   .cbo.on { background:#e6efe9; }
   .cbo b { color:var(--g); }
-  .alert { background:#fff7ed; border:1px solid #fdba74; color:#9a3412; border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:14px; }
-  .alert .out { color:#b91c1c; font-weight:600; }
-  .srow { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid #eef2f0; font-size:14px; }
+  .alert { background:linear-gradient(180deg,#fff9f1,#ffedd5); border-radius:18px; padding:12px 14px; margin-bottom:14px; font-size:14px; color:#9a3412; box-shadow:0 3px 0 #f2c48f, 0 8px 14px rgba(154,52,18,.12); }
+  .alert .out { color:#b91c1c; font-weight:700; }
+  .srow { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #eef2f0; font-size:14.5px; }
   .srow:last-child { border-bottom:0; }
   .srow .v { text-align:right; white-space:nowrap; }
-  .srow.tot { font-weight:700; border-top:2px solid var(--g); }
-  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+  .srow.tot { font-weight:700; border-top:2px solid var(--g); font-size:16px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   .center { text-align:center; color:var(--mut); padding:24px 0; }
+  .okcard { background:linear-gradient(180deg,#f3fbf6,#dff1e6); }
+
+  /* ===== Thanh ghi cố định đáy ===== */
+  .bar { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.96); backdrop-filter:blur(8px); border-radius:22px 22px 0 0; box-shadow:0 -6px 18px rgba(31,69,53,.15); padding:10px 14px calc(12px + env(safe-area-inset-bottom)); z-index:6; }
+  .bar .in { max-width:720px; margin:0 auto; }
+  .bar .sum2 { display:flex; justify-content:space-between; font-size:13px; color:var(--mut); margin:0 4px 8px; }
+  .bar .sum2 b { color:var(--tx); }
+  .modal { position:fixed; inset:0; background:rgba(15,30,24,.5); z-index:20; display:none; align-items:flex-end; justify-content:center; }
+  .modal.show { display:flex; }
+  .sheet { background:#fff; width:100%; max-width:720px; border-radius:26px 26px 0 0; padding:22px 16px calc(18px + env(safe-area-inset-bottom)); max-height:92vh; overflow:auto; position:relative; animation:up .22s ease-out; box-shadow:0 -8px 30px rgba(0,0,0,.25); }
+  .sheet::before { content:""; position:absolute; top:8px; left:50%; width:44px; height:5px; margin-left:-22px; border-radius:3px; background:#cdd8d2; }
+  .sheet h3 { margin:0 0 6px; color:var(--g2); }
+  @keyframes up { from { transform:translateY(40px); opacity:.4; } to { transform:none; opacity:1; } }
+  .toast { position:fixed; left:14px; right:14px; bottom:130px; background:#1f2937; color:#fff; padding:13px 16px; border-radius:18px; z-index:30; display:none; box-shadow:0 8px 20px rgba(0,0,0,.35); font-size:14.5px; }
+  .toast.show { display:block; }
   .spin { display:inline-block; width:16px; height:16px; border:2px solid #fff6; border-top-color:#fff; border-radius:50%; animation:r .7s linear infinite; vertical-align:-3px; margin-right:6px; }
   @keyframes r { to { transform:rotate(360deg); } }
 </style>
@@ -95,7 +145,7 @@
 
 <main id="main"></main>
 
-<div class="bar" id="bar" style="display:none"><div class="in"><button class="btn" id="btnWrite" disabled>Ghi vào bảng kê</button></div></div>
+<div class="bar" id="bar" style="display:none"><div class="in"><div class="sum2"><span id="barCnt"></span><span id="barSum"></span></div><button class="btn big" id="btnWrite" disabled>Ghi vào bảng kê</button></div></div>
 
 <!-- Cài đặt / kết nối -->
 <div class="modal" id="mSettings"><div class="sheet">
@@ -226,25 +276,32 @@ function render() {
   var h = '';
   var openUrl = S.lastUrl || S.init.invoiceUrl;
   var al = S.stock ? S.stock.alerts : [];
-  h += '<button class="btn sec" id="openStock" style="margin-bottom:12px">📊 Tồn kho &amp; doanh số' + (al.length ? ' · <span style="color:#b91c1c">' + al.length + ' cảnh báo</span>' : '') + '</button>';
+  h += '<div class="btnrow"><button class="btn" id="openStock">📊 Tồn kho' + (al.length ? ' <span style="background:#fff;color:#b91c1c;border-radius:999px;padding:1px 8px;text-shadow:none">' + al.length + '</span>' : '') + '</button>' +
+    (openUrl ? '<a class="btn sec" href="' + esc(openUrl) + '" target="_blank" rel="noopener">📄 Mở bảng kê</a>' : '') + '</div>';
   if (al.length) h += '<div class="alert" id="alertBox"><b>⚠ Sản phẩm sắp hết / hết:</b><br>' + al.slice(0, 5).map(function (a) { return a.status === 'out' ? '<span class="out">' + esc(a.p) + ': hết/âm (' + fq(a.left) + ')</span>' : esc(a.p) + ': còn ' + fq(a.left) + ' ' + esc(a.unit) + (a.daysLeft !== '' ? ' (~' + a.daysLeft + ' ngày)' : ''); }).join('<br>') + (al.length > 5 ? '<br>… và ' + (al.length - 5) + ' sản phẩm khác' : '') + '</div>';
-  if (S.lastUrl) h += '<div class="card" style="background:#eef6f0"><h2>✓ Đã ghi xong</h2><p style="margin:0 0 10px">Đã ghi vào tab <b>' + esc(S.lastTab) + '</b> trong file "DANH SÁCH XUẤT HÓA ĐƠN khách lẻ".</p><a class="btn" style="display:block;text-align:center;text-decoration:none" href="' + esc(S.lastUrl) + '" target="_blank" rel="noopener">Mở bảng kê tab ' + esc(S.lastTab) + '</a></div>';
-  else if (openUrl) h += '<a class="btn sec" style="display:block;text-align:center;text-decoration:none;margin-bottom:12px" href="' + esc(openUrl) + '" target="_blank" rel="noopener">Mở file bảng kê hóa đơn</a>';
-  h += '<div class="card"><h2>1. Tab hóa đơn</h2><input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm">';
+  if (S.lastUrl) h += '<div class="card okcard"><h2>✓ Đã ghi xong</h2><p style="margin:0 0 12px">Đã ghi vào tab <b>' + esc(S.lastTab) + '</b> trong file "DANH SÁCH XUẤT HÓA ĐƠN khách lẻ".</p><a class="btn" href="' + esc(S.lastUrl) + '" target="_blank" rel="noopener">Mở bảng kê tab ' + esc(S.lastTab) + '</a></div>';
+  h += '<div class="card"><h2><i>1</i>Tab hóa đơn</h2><input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm">';
   h += '<div class="hint">' + (existing ? 'Tab đã có – đơn mới được nối tiếp phía dưới.' : 'Chưa có tab này – sẽ tự tạo (nhân bản từ tab gần nhất) khi ghi.') + '</div></div>';
 
-  h += '<div class="card"><h2>2. Lấy đơn từ An Maitri VNPost</h2><div class="chips">';
+  h += '<div class="card"><h2><i>2</i>Lấy đơn từ An Maitri VNPost</h2><div class="tabs">';
   S.init.sourceTabs.forEach(function (t) {
-    h += '<button class="chip' + (S.tabsLoaded[t] ? ' on' : '') + '" data-tab="' + esc(t) + '">' + esc(t) + '</button>';
+    var ts = tabState(t), loaded = S.tabsLoaded[t], cls = ts.st === 'done' ? ' done' : ts.st === 'part' ? ' part' : loaded ? ' loaded' : '', sub;
+    if (loaded === 'loading') sub = 'Đang tải…';
+    else if (ts.st === 'done') sub = 'Đã lấy xong · ' + ts.n + '/' + ts.total + ' đơn';
+    else if (ts.st === 'part') sub = 'Đã ghi ' + ts.n + (ts.total ? '/' + ts.total : '') + ' đơn';
+    else if (loaded) sub = 'Đã tải · ' + S.orders.filter(function (o) { return o.tab === t; }).length + ' đơn';
+    else sub = 'Chưa lấy';
+    h += '<button class="tabbtn' + cls + (loaded ? ' loaded' : '') + '" data-tab="' + esc(t) + '"><b>' + esc(t) + '</b><small>' + sub + '</small></button>';
   });
-  h += '</div><div class="hint">Chạm vào tab để tải toàn bộ đơn của tab đó; chạm lần nữa để bỏ.</div>';
-  h += '<button class="btn sec sm" id="addManual" style="margin-top:10px">+ Thêm đơn thủ công (VTP…)</button></div>';
+  h += '</div><div class="legend"><span class="l1">Đã lấy xong</span><span class="l2">Mới lấy một phần</span><span class="l3">Đang tải trong danh sách</span></div>';
+  h += '<div class="hint">Chạm tab để tải đơn; chạm lần nữa để bỏ. Đơn đã ghi trước đó sẽ tự bỏ chọn. <button class="link" id="clrDone">Xóa đánh dấu</button></div>';
+  h += '<button class="btn sec sm" id="addManual" style="margin-top:12px">+ Thêm đơn thủ công (VTP…)</button></div>';
 
   var list = S.orders;
-  h += '<div class="card"><h2>3. Đơn (' + list.filter(function (o) { return o.include && !o.written; }).length + '/' + list.length + ' đã chọn)</h2>';
+  h += '<div class="card"><h2><i>3</i>Đơn <span id="selCnt">(' + list.filter(function (o) { return o.include && !o.written; }).length + '/' + list.length + ' đã chọn)</span></h2>';
   if (!list.length) h += '<div class="center">Chưa có đơn. Chọn tab ở bước 2.</div>';
   else {
-    h += '<div class="row" style="margin-bottom:10px"><button class="btn sec sm" id="selAll">Chọn tất cả</button><button class="btn sec sm" id="selNone">Bỏ chọn</button></div>';
+    h += '<div class="row" style="margin-bottom:12px"><button class="btn sec sm" id="selAll">Chọn tất cả</button><button class="btn sec sm" id="selNone">Bỏ chọn</button></div>';
     list.forEach(function (o) { h += orderHtml(o); });
   }
   h += '</div>';
@@ -255,16 +312,16 @@ function render() {
 
 function orderHtml(o) {
   var iss = orderIssue(o), mm = mismatch(o);
-  var h = '<div class="ord' + (o.include ? '' : ' off') + (o.written ? ' done' : '') + '" data-u="' + o.uid + '">';
+  var h = '<div class="ord' + (o.include ? '' : ' off') + (o.written ? ' done' : '') + (iss ? ' bad' : mm ? ' warn' : '') + '" data-u="' + o.uid + '">';
   h += '<div class="oh"><input type="checkbox" data-a="inc"' + (o.include && !o.written ? ' checked' : '') + (o.written ? ' disabled' : '') + '>';
-  h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok">đã ghi</span>' : '');
+  h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok">đã ghi</span>' : o.prev ? '<span class="tag ok">đã ghi trước đó</span>' : '');
   if (o.dupTabs && o.dupTabs.length) h += '<span class="tag warn">SĐT đã có ở tab ' + esc(o.dupTabs.join(', ')) + '</span>';
   h += '</div><div class="p">' + esc(o.phone) + ' · Thu hộ ' + (o.cod === '' ? '—' : fmt(o.cod)) + ' · ' + esc(o.tab || 'tay') + '</div>';
   h += '<div class="cols"><div><div class="lab">XUẤT HÓA ĐƠN</div>' + effLines(o).map(function (l) { return '<div>' + (l.gift ? '🎁 ' : '') + esc(l.qty) + ' × ' + esc(l.product) + (l.gift ? ' (0đ)' : ' · ' + fmt(l.price)) + '</div>'; }).join('') + '</div>';
   h += '<div><div class="lab r">BÁN THỰC TẾ</div><div class="real">' + (esc(o.sp) || '—') + '</div></div></div>';
   if (iss) h += '<span class="tag bad">' + iss + '</span>';
   else if (mm) h += '<span class="tag warn">Tổng HĐ ' + fmt(orderTotal(o)) + ' ≠ thu hộ ' + fmt(o.cod) + '</span>';
-  h += '</div><div data-a="open" style="color:var(--mut)">' + (o.open ? '▲' : '▼') + '</div></div>';
+  h += '</div><div class="chev" data-a="open">' + (o.open ? '▲' : '▼') + '</div></div>';
   if (o.open) h += detailHtml(o);
   return h + '</div>';
 }
@@ -279,10 +336,10 @@ function detailHtml(o) {
     h += '<select data-f="unit">' + opts(S.init.units, l.unit) + '</select>';
     h += '<button class="x" data-a="del">✕</button></div>';
     h += '<div class="row">' + (l.gift ? '<input value="QUÀ TẶNG – 0đ" disabled>' : '<input data-f="price" inputmode="numeric" value="' + esc(fmt(l.price)) + '" placeholder="Đơn giá (VNĐ)">') + '</div>';
-    h += '<label class="chk"><input type="checkbox" data-f="gift" style="width:auto"' + (l.gift ? ' checked' : '') + '> Quà tặng (0đ)</label></div>';
+    h += '<label class="chk"><input type="checkbox" data-f="gift"' + (l.gift ? ' checked' : '') + '> Quà tặng (0đ)</label></div>';
   });
   h += '<div class="row"><button class="btn sec sm" data-a="addp">+ Sản phẩm</button><button class="btn sec sm" data-a="addg">+ Quà tặng</button></div>';
-  h += '<label class="chk" style="margin-top:10px"><input type="checkbox" data-a="boxon" style="width:auto"' + (o.boxOn ? ' checked' : '') + '> Kèm hộp carton quà tặng</label>';
+  h += '<label class="chk" style="margin-top:12px"><input type="checkbox" data-a="boxon"' + (o.boxOn ? ' checked' : '') + '> Kèm hộp carton quà tặng</label>';
   if (o.boxOn) h += '<select data-a="box">' + opts(S.init.boxes, o.box) + '</select>';
   h += '<div class="chk">Tổng hóa đơn: <b>' + fmt(orderTotal(o)) + '</b>' + (o.cod !== '' ? ' · Thu hộ: <b>' + fmt(o.cod) + '</b>' : '') + '</div></div>';
   return h;
@@ -298,6 +355,8 @@ function refreshBar() {
   var b = $('btnWrite');
   b.disabled = S.busy || !sel.length;
   b.innerHTML = S.busy ? '<span class="spin"></span>Đang ghi…' : 'Ghi ' + sel.length + ' đơn vào tab ' + esc(S.invoiceTab);
+  $('barCnt').innerHTML = 'Đã chọn <b>' + sel.length + '</b> đơn';
+  $('barSum').innerHTML = 'Tổng hóa đơn <b>' + fmt(sel.reduce(function (s2, o) { return s2 + orderTotal(o); }, 0)) + '</b>';
 }
 
 /* ===================== Sự kiện ===================== */
@@ -309,7 +368,8 @@ function bind() {
   var inv = $('invTab');
   if (inv) inv.oninput = function () { S.invoiceTab = inv.value.trim(); refreshBar(); };
   if (inv) inv.onchange = function () { render(); loadStock(); };
-  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) { c.onclick = function () { toggleTab(c.getAttribute('data-tab')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#main .tabbtn'), function (c) { c.onclick = function () { toggleTab(c.getAttribute('data-tab')); }; });
+  var cd = $('clrDone'); if (cd) cd.onclick = function () { if (confirm('Xóa đánh dấu "đã lấy xong" của tất cả tab trong file nguồn này?')) { cfg.done = cfg.done || {}; delete cfg.done[S.init.sourceTitle]; save(); render(); } };
   var am = $('addManual'); if (am) am.onclick = function () { $('mManual').classList.add('show'); };
   var sa = $('selAll'); if (sa) sa.onclick = function () { S.orders.forEach(function (o) { if (!o.written) o.include = true; }); render(); };
   var sn = $('selNone'); if (sn) sn.onclick = function () { S.orders.forEach(function (o) { o.include = false; }); render(); };
@@ -318,7 +378,7 @@ function bind() {
     el.addEventListener('click', function (ev) {
       var t = ev.target, a = t.getAttribute && t.getAttribute('data-a');
       if (a === 'open' || (t.closest && t.closest('[data-a="open"]'))) { o.open = !o.open; render(); return; }
-      if (a === 'inc') { o.include = t.checked; el.classList.toggle('off', !o.include); refreshBar(); $('main').querySelector('.card:last-child h2').textContent = '3. Đơn (' + S.orders.filter(function (x) { return x.include && !x.written; }).length + '/' + S.orders.length + ' đã chọn)'; return; }
+      if (a === 'inc') { o.include = t.checked; el.classList.toggle('off', !o.include); refreshBar(); $('selCnt').textContent = '(' + S.orders.filter(function (x) { return x.include && !x.written; }).length + '/' + S.orders.length + ' đã chọn)'; return; }
       var ln = t.closest && t.closest('.ln'); var i = ln ? Number(ln.getAttribute('data-i')) : -1;
       if (a === 'del') { if (o.lines.length > 1) { o.lines.splice(i, 1); render(); } else toast('Cần ít nhất 1 dòng sản phẩm.'); return; }
       if (a === 'addp') { var p = S.init.products[0]; o.lines.push({ product: p, unit: unitFor(p), qty: 1, price: '', gift: false, priceTouched: true }); render(); return; }
@@ -342,6 +402,14 @@ function bind() {
   });
 }
 
+/* ===== Đánh dấu tab đã lấy dữ liệu (lưu trong máy, theo từng file nguồn) ===== */
+function doneStore() { var k = S.init.sourceTitle; cfg.done = cfg.done || {}; cfg.done[k] = cfg.done[k] || {}; return cfg.done[k]; }
+function rowKey(o) { return o.tab && o.row ? o.tab + '|' + o.row : ''; }
+function tabState(t) {
+  var rec = doneStore()[t]; if (!rec || !rec.rows.length) return { st: 'none' };
+  var n = rec.rows.length;
+  return rec.total && n >= rec.total ? { st: 'done', n: n, total: rec.total } : { st: 'part', n: n, total: rec.total || 0 };
+}
 function toggleTab(t) {
   if (S.tabsLoaded[t]) {
     S.orders = S.orders.filter(function (o) { return o.tab !== t || o.written; });
@@ -351,7 +419,12 @@ function toggleTab(t) {
   toast('Đang tải tab ' + t + '…', 1500);
   api('source', { tab: t, invoiceTab: S.invoiceTab }).then(function (r) {
     S.tabsLoaded[t] = true;
-    r.orders.forEach(function (o) { S.orders.push(newOrder(o)); });
+    var st = doneStore(), rec = st[t] = st[t] || { rows: [], total: 0, at: 0 }; rec.total = r.orders.length; save();
+    r.orders.forEach(function (o) {
+      var ord = newOrder(o), k = rowKey(ord);
+      if (k && rec.rows.indexOf(k) >= 0) { ord.include = false; ord.prev = true; }
+      S.orders.push(ord);
+    });
     if (!r.orders.length) toast('Tab ' + t + ' không có đơn.');
     render();
   }).catch(function (e) { delete S.tabsLoaded[t]; render(); toast('Lỗi: ' + e.message, 6000); });
@@ -375,7 +448,11 @@ function write() {
       lines: effLines(o).map(function (l) { return { product: l.product, unit: l.unit, qty: Number(l.qty), price: l.gift ? 0 : Number(l.price), gift: !!l.gift }; }) };
   });
   api('append', { invoiceTab: S.invoiceTab, orders: payload }).then(function (r) {
-    sel.forEach(function (o) { o.written = true; o.include = false; o.open = false; });
+    sel.forEach(function (o) {
+      o.written = true; o.include = false; o.open = false;
+      var k = rowKey(o); if (k) { var st = doneStore(), rec = st[o.tab] = st[o.tab] || { rows: [], total: 0, at: 0 }; if (rec.rows.indexOf(k) < 0) rec.rows.push(k); rec.at = Date.now(); }
+    });
+    save();
     if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
     S.busy = false; S.lastUrl = r.url; S.lastTab = r.tab; render(); window.scrollTo(0, 0);
     toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
