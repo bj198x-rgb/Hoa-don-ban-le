@@ -61,6 +61,26 @@
   .sheet h3 { margin:0 0 6px; }
   .toast { position:fixed; left:12px; right:12px; bottom:90px; background:#1f2937; color:#fff; padding:12px 14px; border-radius:10px; z-index:30; display:none; }
   .toast.show { display:block; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:0; margin-top:6px; font-size:13px; }
+  .cols > div { padding:2px 8px 2px 0; min-width:0; }
+  .cols > div + div { border-left:2px solid #e3b9b9; padding-left:10px; }
+  .lab { font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--g); margin-bottom:2px; }
+  .lab.r { color:#b91c1c; }
+  .cols .real { white-space:pre-line; color:#7f1d1d; }
+  .cb { position:relative; }
+  .cbi.guess { border-color:#f59e0b; background:#fffbeb; }
+  .cbl { position:absolute; left:0; right:0; top:100%; z-index:15; background:#fff; border:1px solid var(--g); border-radius:8px; margin-top:2px; max-height:230px; overflow:auto; box-shadow:0 6px 18px rgba(0,0,0,.18); }
+  .cbo { padding:10px; border-bottom:1px solid #eef2f0; }
+  .cbo:last-child { border-bottom:0; }
+  .cbo.on { background:#e6efe9; }
+  .cbo b { color:var(--g); }
+  .alert { background:#fff7ed; border:1px solid #fdba74; color:#9a3412; border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:14px; }
+  .alert .out { color:#b91c1c; font-weight:600; }
+  .srow { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid #eef2f0; font-size:14px; }
+  .srow:last-child { border-bottom:0; }
+  .srow .v { text-align:right; white-space:nowrap; }
+  .srow.tot { font-weight:700; border-top:2px solid var(--g); }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
   .center { text-align:center; color:var(--mut); padding:24px 0; }
   .spin { display:inline-block; width:16px; height:16px; border:2px solid #fff6; border-top-color:#fff; border-radius:50%; animation:r .7s linear infinite; vertical-align:-3px; margin-right:6px; }
   @keyframes r { to { transform:rotate(360deg); } }
@@ -104,6 +124,13 @@
   <label>Ship (cột S)</label><input id="mnShip" placeholder="VD: Khách chịu phí ship">
   <div class="row"><div><label>Mã hàng (cột U)</label><input id="mnSku" placeholder="MON / GAC / TRA5V"></div><div><label>Cân nặng kg (cột V)</label><input id="mnKg" inputmode="decimal"></div></div>
   <div class="row" style="margin-top:12px"><button class="btn" id="mnAdd">Thêm vào danh sách</button><button class="btn sec" id="mnClose">Hủy</button></div>
+</div></div>
+
+<!-- Tồn kho & doanh số -->
+<div class="modal" id="mStock"><div class="sheet">
+  <div class="row" style="margin-bottom:8px"><h3 style="flex:1;margin:0">Tồn kho &amp; doanh số</h3><button class="btn sec sm" id="stRefresh">Làm mới</button><button class="btn sec sm" id="stClose">Đóng</button></div>
+  <div class="chips" id="stTabs" style="margin-bottom:10px"></div>
+  <div id="stBody"></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -198,6 +225,9 @@ function render() {
   var existing = S.init.invoiceTabs.indexOf(S.invoiceTab) >= 0;
   var h = '';
   var openUrl = S.lastUrl || S.init.invoiceUrl;
+  var al = S.stock ? S.stock.alerts : [];
+  h += '<button class="btn sec" id="openStock" style="margin-bottom:12px">📊 Tồn kho &amp; doanh số' + (al.length ? ' · <span style="color:#b91c1c">' + al.length + ' cảnh báo</span>' : '') + '</button>';
+  if (al.length) h += '<div class="alert" id="alertBox"><b>⚠ Sản phẩm sắp hết / hết:</b><br>' + al.slice(0, 5).map(function (a) { return a.status === 'out' ? '<span class="out">' + esc(a.p) + ': hết/âm (' + fq(a.left) + ')</span>' : esc(a.p) + ': còn ' + fq(a.left) + ' ' + esc(a.unit) + (a.daysLeft !== '' ? ' (~' + a.daysLeft + ' ngày)' : ''); }).join('<br>') + (al.length > 5 ? '<br>… và ' + (al.length - 5) + ' sản phẩm khác' : '') + '</div>';
   if (S.lastUrl) h += '<div class="card" style="background:#eef6f0"><h2>✓ Đã ghi xong</h2><p style="margin:0 0 10px">Đã ghi vào tab <b>' + esc(S.lastTab) + '</b> trong file "DANH SÁCH XUẤT HÓA ĐƠN khách lẻ".</p><a class="btn" style="display:block;text-align:center;text-decoration:none" href="' + esc(S.lastUrl) + '" target="_blank" rel="noopener">Mở bảng kê tab ' + esc(S.lastTab) + '</a></div>';
   else if (openUrl) h += '<a class="btn sec" style="display:block;text-align:center;text-decoration:none;margin-bottom:12px" href="' + esc(openUrl) + '" target="_blank" rel="noopener">Mở file bảng kê hóa đơn</a>';
   h += '<div class="card"><h2>1. Tab hóa đơn</h2><input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm">';
@@ -230,7 +260,8 @@ function orderHtml(o) {
   h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok">đã ghi</span>' : '');
   if (o.dupTabs && o.dupTabs.length) h += '<span class="tag warn">SĐT đã có ở tab ' + esc(o.dupTabs.join(', ')) + '</span>';
   h += '</div><div class="p">' + esc(o.phone) + ' · Thu hộ ' + (o.cod === '' ? '—' : fmt(o.cod)) + ' · ' + esc(o.tab || 'tay') + '</div>';
-  h += '<div class="sum">' + effLines(o).map(function (l) { return (l.gift ? '🎁 ' : '') + l.qty + ' × ' + esc(l.product) + (l.gift ? ' (0đ)' : ' · ' + fmt(l.price)); }).join('\n') + '</div>';
+  h += '<div class="cols"><div><div class="lab">XUẤT HÓA ĐƠN</div>' + effLines(o).map(function (l) { return '<div>' + (l.gift ? '🎁 ' : '') + esc(l.qty) + ' × ' + esc(l.product) + (l.gift ? ' (0đ)' : ' · ' + fmt(l.price)) + '</div>'; }).join('') + '</div>';
+  h += '<div><div class="lab r">BÁN THỰC TẾ</div><div class="real">' + (esc(o.sp) || '—') + '</div></div></div>';
   if (iss) h += '<span class="tag bad">' + iss + '</span>';
   else if (mm) h += '<span class="tag warn">Tổng HĐ ' + fmt(orderTotal(o)) + ' ≠ thu hộ ' + fmt(o.cod) + '</span>';
   h += '</div><div data-a="open" style="color:var(--mut)">' + (o.open ? '▲' : '▼') + '</div></div>';
@@ -239,10 +270,11 @@ function orderHtml(o) {
 }
 
 function detailHtml(o) {
-  var h = '<div class="od"><div class="info">' + esc(o.addr) + '\nSP thực tế: ' + esc((o.sp || '').replace(/\n/g, ' + ')) + '\nTiền hàng: ' + esc(o.tien) + ' · Ship: ' + esc(o.ship) + ' · Mã: ' + esc(o.sku) + ' · ' + esc(o.kg) + ' kg</div>';
+  var h = '<div class="od"><div class="info">' + esc(o.addr) + '\nTiền hàng: ' + esc(o.tien) + ' · Ship: ' + esc(o.ship) + ' · Mã: ' + esc(o.sku) + ' · ' + esc(o.kg) + ' kg</div>';
   o.lines.forEach(function (l, i) {
     h += '<div class="ln' + (l.gift ? ' gift' : '') + '" data-i="' + i + '">';
-    h += '<select data-f="product"' + (l.guess ? ' class="guess"' : '') + '>' + opts(S.init.products.concat(S.init.boxes), l.product) + '</select>';
+    h += '<div class="lab" style="margin-top:2px">SP XUẤT HÓA ĐƠN' + (l.guess ? ' <span style="color:#b45309">(gợi ý – kiểm tra lại)</span>' : '') + '</div>';
+    h += '<div class="cb"><input class="cbi' + (l.guess ? ' guess' : '') + '" data-f="product" value="' + esc(l.product) + '" placeholder="Gõ để tìm sản phẩm…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><div class="cbl" hidden></div></div>';
     h += '<div class="row"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(l.qty) + '" placeholder="SL">';
     h += '<select data-f="unit">' + opts(S.init.units, l.unit) + '</select>';
     h += '<button class="x" data-a="del">✕</button></div>';
@@ -272,9 +304,11 @@ function refreshBar() {
 function find(u) { return S.orders.filter(function (o) { return o.uid === Number(u); })[0]; }
 
 function bind() {
+  var os = $('openStock'); if (os) os.onclick = openStock;
+  var ab = $('alertBox'); if (ab) ab.onclick = function () { S.stockTab = 'stock'; openStock(); };
   var inv = $('invTab');
   if (inv) inv.oninput = function () { S.invoiceTab = inv.value.trim(); refreshBar(); };
-  if (inv) inv.onchange = function () { render(); };
+  if (inv) inv.onchange = function () { render(); loadStock(); };
   Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) { c.onclick = function () { toggleTab(c.getAttribute('data-tab')); }; });
   var am = $('addManual'); if (am) am.onclick = function () { $('mManual').classList.add('show'); };
   var sa = $('selAll'); if (sa) sa.onclick = function () { S.orders.forEach(function (o) { if (!o.written) o.include = true; }); render(); };
@@ -294,10 +328,9 @@ function bind() {
     el.addEventListener('change', function (ev) {
       var t = ev.target, f = t.getAttribute && t.getAttribute('data-f'), a = t.getAttribute && t.getAttribute('data-a');
       if (a === 'box') { o.box = t.value; render(); return; }
-      if (!f) return;
+      if (!f || f === 'product') return;   // ô sản phẩm do bộ tìm kiếm xử lý
       var ln = t.closest('.ln'), l = o.lines[Number(ln.getAttribute('data-i'))];
-      if (f === 'product') { l.product = t.value; l.unit = unitFor(t.value); l.guess = false; }
-      else if (f === 'unit') l.unit = t.value;
+      if (f === 'unit') l.unit = t.value;
       else if (f === 'gift') { l.gift = t.checked; if (l.gift) l.price = 0; else if (l.price === 0) l.price = ''; }
       else if (f === 'qty') {
         l.qty = Number(String(t.value).replace(',', '.')) || 0;
@@ -346,7 +379,7 @@ function write() {
     if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
     S.busy = false; S.lastUrl = r.url; S.lastTab = r.tab; render(); window.scrollTo(0, 0);
     toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
-    cfg.lastUrl = r.url; save();
+    cfg.lastUrl = r.url; save(); loadStock(true);
   }).catch(function (e) { S.busy = false; refreshBar(); toast('Lỗi: ' + e.message, 8000); });
 }
 
@@ -383,11 +416,142 @@ $('btnWrite').onclick = write;
 $('mSettings').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
 $('mManual').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
 
+
+/* ===================== Ô tìm sản phẩm (gõ không dấu cũng ra) ===================== */
+function norm(s) { return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase(); }
+function allProducts() { return S.init ? S.init.products.concat(S.init.boxes) : []; }
+function searchProducts(q) {
+  var toks = norm(q).split(/\s+/).filter(Boolean), list = allProducts();
+  if (!toks.length) return list;
+  return list.filter(function (p) { var n = norm(p); return toks.every(function (t) { return n.indexOf(t) >= 0; }); })
+    .sort(function (a, b) { return (norm(a).indexOf(toks[0]) === 0 ? 0 : 1) - (norm(b).indexOf(toks[0]) === 0 ? 0 : 1); });
+}
+function hilite(p, q) {
+  var toks = norm(q).split(/\s+/).filter(Boolean); if (!toks.length) return esc(p);
+  var np = norm(p), mark = new Array(p.length).fill(false);   // norm giữ nguyên độ dài (NFD đã bỏ dấu sau khi ghép lại)
+  if (np.length !== p.length) return esc(p);
+  toks.forEach(function (t) { var i = np.indexOf(t); if (i >= 0) for (var k = i; k < i + t.length; k++) mark[k] = true; });
+  var out = '', open = false;
+  for (var i = 0; i < p.length; i++) { if (mark[i] && !open) { out += '<b>'; open = true; } if (!mark[i] && open) { out += '</b>'; open = false; } out += esc(p[i]); }
+  return out + (open ? '</b>' : '');
+}
+function cbShow(inp) {
+  var box = inp.parentNode.querySelector('.cbl'), q = inp.getAttribute('data-q') === '1' ? inp.value : '';
+  var res = searchProducts(q);
+  box.innerHTML = res.length ? res.map(function (p, i) { return '<div class="cbo' + (i === 0 ? ' on' : '') + '" data-v="' + esc(p) + '">' + hilite(p, q) + '</div>'; }).join('') : '<div class="cbo">Không thấy sản phẩm phù hợp</div>';
+  box.hidden = false;
+}
+function cbHide(inp) { var b = inp.parentNode.querySelector('.cbl'); if (b) b.hidden = true; }
+function cbLine(inp) {
+  var ord = find(inp.closest('.ord').getAttribute('data-u')), i = Number(inp.closest('.ln').getAttribute('data-i'));
+  return { o: ord, l: ord.lines[i] };
+}
+function cbPick(inp, val) {
+  var c = cbLine(inp);
+  if (val !== c.l.product) { c.l.product = val; c.l.unit = unitFor(val); }
+  c.l.guess = false; inp.setAttribute('data-picked', '1'); render();
+}
+document.addEventListener('focusin', function (e) {
+  var t = e.target; if (!t.classList || !t.classList.contains('cbi')) return;
+  t.setAttribute('data-q', '0'); t.setAttribute('data-picked', ''); t.select(); cbShow(t);
+});
+document.addEventListener('input', function (e) {
+  var t = e.target; if (!t.classList || !t.classList.contains('cbi')) return;
+  t.setAttribute('data-q', '1'); cbShow(t);
+});
+document.addEventListener('keydown', function (e) {
+  var t = e.target; if (!t.classList || !t.classList.contains('cbi')) return;
+  if (e.key === 'Enter') { e.preventDefault(); var first = t.parentNode.querySelector('.cbo.on[data-v]'); if (first) cbPick(t, first.getAttribute('data-v')); }
+  if (e.key === 'Escape') t.blur();
+});
+document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.cbl')) e.preventDefault(); });   // giữ focus để chọn được
+document.addEventListener('click', function (e) {
+  var o = e.target.closest && e.target.closest('.cbo[data-v]'); if (!o) return;
+  var inp = o.closest('.cb').querySelector('.cbi'); cbPick(inp, o.getAttribute('data-v'));
+});
+document.addEventListener('focusout', function (e) {
+  var t = e.target; if (!t.classList || !t.classList.contains('cbi') || t.getAttribute('data-picked') === '1') return;
+  var typed = norm(t.value).trim(), hit = allProducts().filter(function (p) { return norm(p) === typed; })[0];
+  cbHide(t);
+  var c = cbLine(t);
+  if (hit && hit !== c.l.product) { cbPick(t, hit); return; }
+  t.value = c.l.product;   // gõ chưa khớp sản phẩm nào -> trả về giá trị cũ
+});
+
+/* ===================== Tồn kho & doanh số ===================== */
+function fq(n) { return (n === '' || n == null || isNaN(n)) ? '' : Number(n).toLocaleString('vi-VN', { maximumFractionDigits: 2 }); }
+function loadStock(refresh) {
+  if (!S.init) return Promise.resolve();
+  S.stockLoading = true; renderStockIfOpen();
+  return api('stock', { date: S.invoiceTab, refresh: !!refresh }).then(function (r) { S.stock = r; S.stockLoading = false; S.stockErr = ''; render(); renderStockIfOpen(); })
+    .catch(function (e) { S.stockLoading = false; S.stockErr = e.message; renderStockIfOpen(); });
+}
+function stBadge(it) {
+  if (it.status === 'out') return '<span class="tag bad">HẾT / ÂM</span>';
+  if (it.status === 'low') return '<span class="tag warn">Gần hết' + (it.daysLeft !== '' ? ' · ~' + it.daysLeft + ' ngày' : '') + '</span>';
+  if (it.status === 'ok') return '<span class="tag ok">Còn đủ</span>';
+  return '<span class="tag">Chưa kiểm kê</span>';
+}
+function renderStockIfOpen() { if ($('mStock').classList.contains('show')) renderStock(); }
+function renderStock() {
+  var tabs = [['day', 'Hôm nay'], ['month', 'Tháng'], ['stock', 'Tồn kho']];
+  $('stTabs').innerHTML = tabs.map(function (t) { return '<button class="chip' + (S.stockTab === t[0] ? ' on' : '') + '" data-st="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+  var b = $('stBody'), r = S.stock;
+  if (!r) { b.innerHTML = '<div class="center">' + (S.stockErr ? 'Lỗi: ' + esc(S.stockErr) : 'Đang tính số liệu…') + '</div>'; return; }
+  var h = S.stockLoading ? '<div class="hint">Đang cập nhật…</div>' : '';
+  if (S.stockTab === 'day' || S.stockTab === 'month') {
+    var d = S.stockTab === 'day' ? r.day : r.month;
+    h += '<div class="hint">' + (S.stockTab === 'day' ? 'Tab ' + esc(r.date) : 'Tháng ' + esc(r.monthLabel) + ' (đến ' + esc(r.date) + ')') + ' · gồm cả hộp carton quà tặng</div>';
+    h += '<div class="srow tot"><span>Tổng tiền xuất</span><span class="v">' + fmt(d.total) + '</span></div>';
+    h += d.rows.length ? d.rows.map(function (x) { return '<div class="srow"><span>' + esc(x.p) + '</span><span class="v">' + fq(x.qty) + ' · ' + fmt(x.money) + '</span></div>'; }).join('') : '<div class="center">Chưa có số liệu.</div>';
+  } else if (!S.stockEdit) {
+    h += '<div class="hint">Còn lại = số kiểm kê − số đã xuất sau ngày kiểm kê. Cảnh báo khi còn dưới ' + r.warnDays + ' ngày (theo tốc độ xuất ' + r.avgDays + ' ngày gần nhất) hoặc chạm ngưỡng bạn đặt.</div>';
+    h += '<button class="btn sm" id="stEdit" style="margin:8px 0">Nhập / sửa số kiểm kê</button>';
+    var its = r.items.slice().sort(function (a, b2) { var w = { out: 0, low: 1, ok: 2, none: 3 }; return w[a.status] - w[b2.status]; });
+    h += its.map(function (it) {
+      return '<div class="srow"><span>' + esc(it.p) + '<div class="hint" style="margin:0">' + (it.status === 'none' ? 'Chưa có số kiểm kê' : 'Kiểm kê ' + fq(it.base) + ' (' + esc(it.baseDate) + ') · đã xuất ' + fq(it.out)) + '</div></span><span class="v">' + (it.status === 'none' ? '' : '<b>' + fq(it.left) + '</b> ' + esc(it.unit)) + '<div>' + stBadge(it) + '</div></span></div>';
+    }).join('');
+  } else {
+    h += '<div class="hint">Nhập số lượng thực tế tồn ở ngày kiểm kê. Để trống = không theo dõi sản phẩm đó. Ngưỡng là số lượng, chạm ngưỡng thì cảnh báo (không bắt buộc).</div>';
+    r.items.forEach(function (it, i) {
+      h += '<div class="ln" data-k="' + i + '"><b>' + esc(it.p) + '</b><div class="grid3" style="margin-top:6px"><div><label>Tồn kiểm kê</label><input data-e="base" inputmode="decimal" value="' + esc(it.base) + '"></div>' +
+        '<div><label>Ngày kiểm kê</label><input type="date" data-e="date" value="' + esc(dmyToIso(it.baseDate)) + '"></div>' +
+        '<div><label>Ngưỡng</label><input data-e="thr" inputmode="decimal" value="' + esc(it.thr) + '"></div></div></div>';
+    });
+    h += '<div class="row" style="margin-top:10px"><button class="btn" id="stSave">Lưu số kiểm kê</button><button class="btn sec" id="stCancel">Hủy</button></div>';
+  }
+  b.innerHTML = h;
+}
+function dmyToIso(t) { var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; }
+function saveStock() {
+  var today = new Date(), iso = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+  var items = [];
+  Array.prototype.forEach.call($('stBody').querySelectorAll('[data-k]'), function (el) {
+    var it = S.stock.items[Number(el.getAttribute('data-k'))];
+    var g = function (k) { return el.querySelector('[data-e=' + k + ']').value.trim().replace(',', '.'); };
+    var base = g('base'); if (base === '') return;
+    items.push({ p: it.p, unit: it.unit || unitFor(it.p), base: base, date: g('date') || iso, thr: g('thr') });
+  });
+  api('setStock', { items: items }).then(function (r) { toast('Đã lưu ' + r.saved + ' số kiểm kê.'); S.stockEdit = false; return loadStock(true); })
+    .catch(function (e) { toast('Lỗi: ' + e.message, 7000); });
+}
+function openStock() { S.stockTab = S.stockTab || 'day'; S.stockEdit = false; $('mStock').classList.add('show'); renderStock(); if (!S.stock) loadStock(); }
+$('stClose').onclick = function () { $('mStock').classList.remove('show'); };
+$('stRefresh').onclick = function () { loadStock(true); };
+$('mStock').addEventListener('click', function (e) {
+  var t = e.target;
+  if (t === this) { this.classList.remove('show'); return; }
+  var st = t.getAttribute && t.getAttribute('data-st'); if (st) { S.stockTab = st; S.stockEdit = false; renderStock(); return; }
+  if (t.id === 'stEdit') { S.stockEdit = true; renderStock(); }
+  if (t.id === 'stCancel') { S.stockEdit = false; renderStock(); }
+  if (t.id === 'stSave') saveStock();
+});
+
 function start() {
   S.init = null; render();
   if (!cfg.url || !cfg.key) return;
   api('init').then(function (r) {
-    S.init = r; if (!S.invoiceTab) S.invoiceTab = r.today; render();
+    S.init = r; if (!S.invoiceTab) S.invoiceTab = r.today; render(); loadStock();
   }).catch(function (e) { $('main').innerHTML = '<div class="card"><h2>Không kết nối được</h2><p>' + esc(e.message) + '</p><button class="btn" id="retry">Thử lại</button> <button class="btn sec" id="goSet2" style="margin-top:8px">Cài đặt</button></div>'; $('retry').onclick = start; $('goSet2').onclick = openSettings; });
 }
 start();
