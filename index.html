@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#356854">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hóa đơn lẻ">
+<title>AN MAITRI – Bảng kê hóa đơn</title>
+<style>
+  :root { --g:#356854; --g2:#2a5443; --bg:#f3f6f4; --card:#fff; --line:#dfe6e2; --tx:#1d2b25; --mut:#6b7a73; --warn:#c2410c; --ok:#15803d; --bad:#b91c1c; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; background:var(--bg); color:var(--tx); font:15px/1.4 -apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:var(--g); color:#fff; padding:calc(10px + env(safe-area-inset-top)) 14px 10px; display:flex; align-items:center; justify-content:space-between; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  header small { display:block; opacity:.8; font-weight:400; font-size:12px; }
+  .icon { background:none; border:0; color:#fff; font-size:22px; padding:4px 8px; }
+  main { padding:12px 12px 110px; max-width:720px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px; }
+  .card h2 { font-size:13px; margin:0 0 8px; color:var(--mut); text-transform:uppercase; letter-spacing:.04em; }
+  label { display:block; font-size:12px; color:var(--mut); margin:8px 0 3px; }
+  input,select,textarea { width:100%; font:inherit; padding:10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--tx); }
+  input:focus,select:focus { outline:2px solid var(--g); border-color:var(--g); }
+  .row { display:flex; gap:8px; align-items:center; }
+  .row > * { flex:1; min-width:0; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:8px 14px; font:inherit; color:var(--tx); }
+  .chip.on { background:var(--g); border-color:var(--g); color:#fff; }
+  .btn { border:0; border-radius:10px; padding:12px 14px; font:inherit; font-weight:600; background:var(--g); color:#fff; width:100%; }
+  .btn.sec { background:#e6efe9; color:var(--g2); }
+  .btn.sm { padding:8px 10px; font-size:13px; width:auto; }
+  .btn:disabled { opacity:.5; }
+  .hint { font-size:12px; color:var(--mut); margin-top:6px; }
+  .ord { border:1px solid var(--line); border-radius:12px; background:#fff; margin-bottom:10px; overflow:hidden; }
+  .ord.off { opacity:.55; }
+  .ord.done { background:#eef6f0; }
+  .oh { display:flex; gap:10px; padding:10px 12px; align-items:flex-start; }
+  .oh input[type=checkbox] { width:22px; height:22px; margin-top:2px; flex:none; accent-color:var(--g); }
+  .oh .t { flex:1; min-width:0; }
+  .oh .n { font-weight:600; }
+  .oh .p { color:var(--mut); font-size:13px; }
+  .oh .sum { font-size:13px; margin-top:4px; white-space:pre-line; }
+  .tag { display:inline-block; font-size:11px; padding:2px 7px; border-radius:999px; background:#eef1ef; color:var(--mut); margin-left:4px; }
+  .tag.warn { background:#ffedd5; color:var(--warn); }
+  .tag.ok { background:#dcfce7; color:var(--ok); }
+  .tag.bad { background:#fee2e2; color:var(--bad); }
+  .od { border-top:1px dashed var(--line); padding:10px 12px 12px; background:#fafcfb; }
+  .info { font-size:13px; color:var(--mut); white-space:pre-line; margin-bottom:8px; }
+  .ln { border:1px solid var(--line); border-radius:10px; padding:8px; margin-bottom:8px; background:#fff; }
+  .ln.gift { background:#fff8ec; border-color:#f4d9a8; }
+  .ln select.guess { border-color:#f59e0b; background:#fffbeb; }
+  .ln .row { margin-top:6px; }
+  .ln .q { flex:0 0 72px; text-align:center; }
+  .ln .x { flex:none; width:40px; border:0; background:#fee2e2; color:var(--bad); border-radius:8px; height:40px; font-size:18px; }
+  .chk { font-size:13px; margin:6px 0; }
+  .bar { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); z-index:6; }
+  .bar .in { max-width:720px; margin:0 auto; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:20; display:none; align-items:flex-end; justify-content:center; }
+  .modal.show { display:flex; }
+  .sheet { background:#fff; width:100%; max-width:720px; border-radius:16px 16px 0 0; padding:16px 14px calc(16px + env(safe-area-inset-bottom)); max-height:90vh; overflow:auto; }
+  .sheet h3 { margin:0 0 6px; }
+  .toast { position:fixed; left:12px; right:12px; bottom:90px; background:#1f2937; color:#fff; padding:12px 14px; border-radius:10px; z-index:30; display:none; }
+  .toast.show { display:block; }
+  .center { text-align:center; color:var(--mut); padding:24px 0; }
+  .spin { display:inline-block; width:16px; height:16px; border:2px solid #fff6; border-top-color:#fff; border-radius:50%; animation:r .7s linear infinite; vertical-align:-3px; margin-right:6px; }
+  @keyframes r { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bảng kê hóa đơn khách lẻ<small id="subtitle"></small></h1>
+  <button class="icon" id="btnSettings" aria-label="Cài đặt">⚙</button>
+</header>
+
+<main id="main"></main>
+
+<div class="bar" id="bar" style="display:none"><div class="in"><button class="btn" id="btnWrite" disabled>Ghi vào bảng kê</button></div></div>
+
+<!-- Cài đặt / kết nối -->
+<div class="modal" id="mSettings"><div class="sheet">
+  <h3>Cài đặt</h3>
+  <label>Địa chỉ API (link Apps Script đã triển khai, kết thúc bằng /exec)</label>
+  <input id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec" autocapitalize="off" autocorrect="off">
+  <label>Mật khẩu (API_KEY)</label>
+  <input id="cfgKey" type="password" autocomplete="current-password">
+  <div class="row" style="margin-top:12px"><button class="btn" id="cfgSave">Lưu &amp; kết nối</button><button class="btn sec" id="cfgClose">Đóng</button></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+  <h3>Đổi file An Maitri VNPost (đầu tháng)</h3>
+  <p class="hint" id="srcNow"></p>
+  <label>Dán link Google Sheet của tháng mới</label>
+  <input id="srcUrl" placeholder="https://docs.google.com/spreadsheets/d/..." autocapitalize="off" autocorrect="off">
+  <button class="btn sec" style="margin-top:10px" id="srcSave">Đổi file nguồn</button>
+</div></div>
+
+<!-- Thêm đơn tay -->
+<div class="modal" id="mManual"><div class="sheet">
+  <h3>Thêm đơn thủ công (VD: Viettel Post)</h3>
+  <label>Tên khách</label><input id="mnName">
+  <label>Số điện thoại</label><input id="mnPhone" inputmode="tel">
+  <label>Địa chỉ</label><input id="mnAddr">
+  <div class="row"><div><label>Thu hộ (VNĐ)</label><input id="mnCod" inputmode="numeric"></div><div><label>Tiền hàng (nghìn)</label><input id="mnTien" inputmode="numeric"></div></div>
+  <label>Sản phẩm thực tế (cột P)</label><textarea id="mnSp" rows="2"></textarea>
+  <label>Ship (cột S)</label><input id="mnShip" placeholder="VD: Khách chịu phí ship">
+  <div class="row"><div><label>Mã hàng (cột U)</label><input id="mnSku" placeholder="MON / GAC / TRA5V"></div><div><label>Cân nặng kg (cột V)</label><input id="mnKg" inputmode="decimal"></div></div>
+  <div class="row" style="margin-top:12px"><button class="btn" id="mnAdd">Thêm vào danh sách</button><button class="btn sec" id="mnClose">Hủy</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== Cấu hình mặc định (sửa được) ===================== */
+// Gợi ý sản phẩm hóa đơn theo mã hàng (cột AM). Chỉ là gợi ý – ô sẽ viền cam đến khi bạn chọn lại.
+var SKU_DEFAULT_PRODUCT = {
+  MON: 'Cốt nghệ mật ong lên men',
+  GAC: 'Gấc lên men',
+  MOG: 'Mật Ong Gừng quất muối',
+  TRA5V: 'Màng Gấc tách hạt'
+};
+var FALLBACK_PRODUCT = 'Phôi xà bông';           // khi đơn không có mã hàng
+var BOX_BY_SKU = { TRA5V: '25x15x11' };          // mã hàng -> kích thước hộp
+var BOX_DEFAULT = '35x11x11';
+
+/* ===================== Trạng thái ===================== */
+var LS = 'amt_invoice_cfg_v1';
+var cfg = load();
+var S = { init: null, orders: [], tabsLoaded: {}, invoiceTab: '', busy: false };
+var uid = 0;
+
+function load() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
+function save() { try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch (e) {} }
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+function fmt(n) { return (n === '' || n == null || isNaN(n)) ? '' : Number(n).toLocaleString('vi-VN'); }
+function digits(s) { var d = String(s == null ? '' : s).replace(/[^\d]/g, ''); return d === '' ? '' : Number(d); }
+function toast(msg, ms) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('show'); }, ms || 3500); }
+
+/* ===================== Gọi API ===================== */
+function api(action, data) {
+  if (!cfg.url || !cfg.key) return Promise.reject(new Error('Chưa cài đặt API.'));
+  var body = Object.assign({ key: cfg.key, action: action }, data || {});
+  return fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) { if (!j.ok) throw new Error(j.error || 'Lỗi không xác định'); return j; });
+}
+
+/* ===================== Logic đơn ===================== */
+function unitFor(p) {
+  if (/carton/i.test(p)) return 'Hộp';
+  if (/xà bông|màng gấc/i.test(p)) return 'Kg';
+  if (/\d+\s?ml|oil|hương/i.test(p)) return 'Chai 20ml';
+  return 'Chai 500ml';
+}
+function findBox(size) {
+  var b = (S.init.boxes || []).filter(function (x) { return x.indexOf(size) >= 0; })[0];
+  return b || (S.init.boxes || [])[0] || '';
+}
+function newOrder(o) {
+  var sku = String(o.sku || '').toUpperCase();
+  var prod = SKU_DEFAULT_PRODUCT[sku] || FALLBACK_PRODUCT;
+  if (S.init.products.indexOf(prod) < 0) prod = S.init.products[0] || prod;
+  var cod = (o.cod === '' || o.cod == null) ? '' : Number(o.cod);
+  var ord = Object.assign({ uid: ++uid, include: true, open: false, written: false, dupTabs: [] }, o, { cod: cod });
+  ord.lines = [{ product: prod, unit: unitFor(prod), qty: 1, price: cod, gift: false, guess: true, priceTouched: false }];
+  ord.boxOn = true;
+  ord.box = findBox(BOX_BY_SKU[sku] || BOX_DEFAULT);
+  return ord;
+}
+function effLines(o) {
+  var ls = o.lines.slice();
+  if (o.boxOn && o.box) ls.push({ product: o.box, unit: 'Hộp', qty: 1, price: 0, gift: true });
+  return ls;
+}
+function lineTotal(l) { return l.gift ? 0 : (Number(l.qty) || 0) * (Number(l.price) || 0); }
+function orderTotal(o) { return o.lines.reduce(function (s, l) { return s + lineTotal(l); }, 0); }
+function orderIssue(o) {
+  for (var i = 0; i < o.lines.length; i++) {
+    var l = o.lines[i];
+    if (!l.product) return 'Thiếu sản phẩm';
+    if (!(Number(l.qty) > 0)) return 'Số lượng = 0';
+    if (!l.gift && (l.price === '' || l.price == null || isNaN(l.price))) return 'Thiếu đơn giá';
+  }
+  return '';
+}
+function mismatch(o) { return o.cod !== '' && o.cod > 0 && Math.round(orderTotal(o)) !== Math.round(o.cod); }
+
+/* ===================== Vẽ giao diện ===================== */
+function render() {
+  var m = $('main');
+  if (!cfg.url || !cfg.key) {
+    $('bar').style.display = 'none';
+    m.innerHTML = '<div class="card"><h2>Chưa kết nối</h2><p>Nhập địa chỉ API và mật khẩu để bắt đầu.</p><button class="btn" id="goSet">Mở cài đặt</button></div>';
+    $('goSet').onclick = openSettings; return;
+  }
+  if (!S.init) { m.innerHTML = '<div class="center">Đang kết nối…</div>'; $('bar').style.display = 'none'; return; }
+  $('subtitle').textContent = 'Nguồn: ' + S.init.sourceTitle;
+
+  var existing = S.init.invoiceTabs.indexOf(S.invoiceTab) >= 0;
+  var h = '';
+  h += '<div class="card"><h2>1. Tab hóa đơn</h2><input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm">';
+  h += '<div class="hint">' + (existing ? 'Tab đã có – đơn mới được nối tiếp phía dưới.' : 'Chưa có tab này – sẽ tự tạo (nhân bản từ tab gần nhất) khi ghi.') + '</div></div>';
+
+  h += '<div class="card"><h2>2. Lấy đơn từ An Maitri VNPost</h2><div class="chips">';
+  S.init.sourceTabs.forEach(function (t) {
+    h += '<button class="chip' + (S.tabsLoaded[t] ? ' on' : '') + '" data-tab="' + esc(t) + '">' + esc(t) + '</button>';
+  });
+  h += '</div><div class="hint">Chạm vào tab để tải toàn bộ đơn của tab đó; chạm lần nữa để bỏ.</div>';
+  h += '<button class="btn sec sm" id="addManual" style="margin-top:10px">+ Thêm đơn thủ công (VTP…)</button></div>';
+
+  var list = S.orders;
+  h += '<div class="card"><h2>3. Đơn (' + list.filter(function (o) { return o.include && !o.written; }).length + '/' + list.length + ' đã chọn)</h2>';
+  if (!list.length) h += '<div class="center">Chưa có đơn. Chọn tab ở bước 2.</div>';
+  else {
+    h += '<div class="row" style="margin-bottom:10px"><button class="btn sec sm" id="selAll">Chọn tất cả</button><button class="btn sec sm" id="selNone">Bỏ chọn</button></div>';
+    list.forEach(function (o) { h += orderHtml(o); });
+  }
+  h += '</div>';
+  m.innerHTML = h;
+  bind();
+  refreshBar();
+}
+
+function orderHtml(o) {
+  var iss = orderIssue(o), mm = mismatch(o);
+  var h = '<div class="ord' + (o.include ? '' : ' off') + (o.written ? ' done' : '') + '" data-u="' + o.uid + '">';
+  h += '<div class="oh"><input type="checkbox" data-a="inc"' + (o.include && !o.written ? ' checked' : '') + (o.written ? ' disabled' : '') + '>';
+  h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok">đã ghi</span>' : '');
+  if (o.dupTabs && o.dupTabs.length) h += '<span class="tag warn">SĐT đã có ở tab ' + esc(o.dupTabs.join(', ')) + '</span>';
+  h += '</div><div class="p">' + esc(o.phone) + ' · Thu hộ ' + (o.cod === '' ? '—' : fmt(o.cod)) + ' · ' + esc(o.tab || 'tay') + '</div>';
+  h += '<div class="sum">' + effLines(o).map(function (l) { return (l.gift ? '🎁 ' : '') + l.qty + ' × ' + esc(l.product) + (l.gift ? ' (0đ)' : ' · ' + fmt(l.price)); }).join('\n') + '</div>';
+  if (iss) h += '<span class="tag bad">' + iss + '</span>';
+  else if (mm) h += '<span class="tag warn">Tổng HĐ ' + fmt(orderTotal(o)) + ' ≠ thu hộ ' + fmt(o.cod) + '</span>';
+  h += '</div><div data-a="open" style="color:var(--mut)">' + (o.open ? '▲' : '▼') + '</div></div>';
+  if (o.open) h += detailHtml(o);
+  return h + '</div>';
+}
+
+function detailHtml(o) {
+  var h = '<div class="od"><div class="info">' + esc(o.addr) + '\nSP thực tế: ' + esc((o.sp || '').replace(/\n/g, ' + ')) + '\nTiền hàng: ' + esc(o.tien) + ' · Ship: ' + esc(o.ship) + ' · Mã: ' + esc(o.sku) + ' · ' + esc(o.kg) + ' kg</div>';
+  o.lines.forEach(function (l, i) {
+    h += '<div class="ln' + (l.gift ? ' gift' : '') + '" data-i="' + i + '">';
+    h += '<select data-f="product"' + (l.guess ? ' class="guess"' : '') + '>' + opts(S.init.products.concat(S.init.boxes), l.product) + '</select>';
+    h += '<div class="row"><input class="q" data-f="qty" inputmode="decimal" value="' + esc(l.qty) + '" placeholder="SL">';
+    h += '<select data-f="unit">' + opts(S.init.units, l.unit) + '</select>';
+    h += '<button class="x" data-a="del">✕</button></div>';
+    h += '<div class="row">' + (l.gift ? '<input value="QUÀ TẶNG – 0đ" disabled>' : '<input data-f="price" inputmode="numeric" value="' + esc(fmt(l.price)) + '" placeholder="Đơn giá (VNĐ)">') + '</div>';
+    h += '<label class="chk"><input type="checkbox" data-f="gift" style="width:auto"' + (l.gift ? ' checked' : '') + '> Quà tặng (0đ)</label></div>';
+  });
+  h += '<div class="row"><button class="btn sec sm" data-a="addp">+ Sản phẩm</button><button class="btn sec sm" data-a="addg">+ Quà tặng</button></div>';
+  h += '<label class="chk" style="margin-top:10px"><input type="checkbox" data-a="boxon" style="width:auto"' + (o.boxOn ? ' checked' : '') + '> Kèm hộp carton quà tặng</label>';
+  if (o.boxOn) h += '<select data-a="box">' + opts(S.init.boxes, o.box) + '</select>';
+  h += '<div class="chk">Tổng hóa đơn: <b>' + fmt(orderTotal(o)) + '</b>' + (o.cod !== '' ? ' · Thu hộ: <b>' + fmt(o.cod) + '</b>' : '') + '</div></div>';
+  return h;
+}
+function opts(arr, cur) {
+  var a = arr.slice(); if (cur && a.indexOf(cur) < 0) a.unshift(cur);
+  return a.map(function (x) { return '<option' + (x === cur ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('');
+}
+
+function refreshBar() {
+  var sel = S.orders.filter(function (o) { return o.include && !o.written; });
+  var bar = $('bar'); bar.style.display = S.orders.length ? 'block' : 'none';
+  var b = $('btnWrite');
+  b.disabled = S.busy || !sel.length;
+  b.innerHTML = S.busy ? '<span class="spin"></span>Đang ghi…' : 'Ghi ' + sel.length + ' đơn vào tab ' + esc(S.invoiceTab);
+}
+
+/* ===================== Sự kiện ===================== */
+function find(u) { return S.orders.filter(function (o) { return o.uid === Number(u); })[0]; }
+
+function bind() {
+  var inv = $('invTab');
+  if (inv) inv.oninput = function () { S.invoiceTab = inv.value.trim(); refreshBar(); };
+  if (inv) inv.onchange = function () { render(); };
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) { c.onclick = function () { toggleTab(c.getAttribute('data-tab')); }; });
+  var am = $('addManual'); if (am) am.onclick = function () { $('mManual').classList.add('show'); };
+  var sa = $('selAll'); if (sa) sa.onclick = function () { S.orders.forEach(function (o) { if (!o.written) o.include = true; }); render(); };
+  var sn = $('selNone'); if (sn) sn.onclick = function () { S.orders.forEach(function (o) { o.include = false; }); render(); };
+  Array.prototype.forEach.call(document.querySelectorAll('.ord'), function (el) {
+    var o = find(el.getAttribute('data-u'));
+    el.addEventListener('click', function (ev) {
+      var t = ev.target, a = t.getAttribute && t.getAttribute('data-a');
+      if (a === 'open' || (t.closest && t.closest('[data-a="open"]'))) { o.open = !o.open; render(); return; }
+      if (a === 'inc') { o.include = t.checked; el.classList.toggle('off', !o.include); refreshBar(); $('main').querySelector('.card:last-child h2').textContent = '3. Đơn (' + S.orders.filter(function (x) { return x.include && !x.written; }).length + '/' + S.orders.length + ' đã chọn)'; return; }
+      var ln = t.closest && t.closest('.ln'); var i = ln ? Number(ln.getAttribute('data-i')) : -1;
+      if (a === 'del') { if (o.lines.length > 1) { o.lines.splice(i, 1); render(); } else toast('Cần ít nhất 1 dòng sản phẩm.'); return; }
+      if (a === 'addp') { var p = S.init.products[0]; o.lines.push({ product: p, unit: unitFor(p), qty: 1, price: '', gift: false, priceTouched: true }); render(); return; }
+      if (a === 'addg') { var g = S.init.products[0]; o.lines.push({ product: g, unit: unitFor(g), qty: 1, price: 0, gift: true }); render(); return; }
+      if (a === 'boxon') { o.boxOn = t.checked; render(); return; }
+    });
+    el.addEventListener('change', function (ev) {
+      var t = ev.target, f = t.getAttribute && t.getAttribute('data-f'), a = t.getAttribute && t.getAttribute('data-a');
+      if (a === 'box') { o.box = t.value; render(); return; }
+      if (!f) return;
+      var ln = t.closest('.ln'), l = o.lines[Number(ln.getAttribute('data-i'))];
+      if (f === 'product') { l.product = t.value; l.unit = unitFor(t.value); l.guess = false; }
+      else if (f === 'unit') l.unit = t.value;
+      else if (f === 'gift') { l.gift = t.checked; if (l.gift) l.price = 0; else if (l.price === 0) l.price = ''; }
+      else if (f === 'qty') {
+        l.qty = Number(String(t.value).replace(',', '.')) || 0;
+        if (!l.priceTouched && o.lines.length === 1 && o.cod !== '' && l.qty > 0) l.price = Math.round(o.cod / l.qty);
+      }
+      else if (f === 'price') { l.price = digits(t.value); l.priceTouched = true; }
+      render();
+    });
+  });
+}
+
+function toggleTab(t) {
+  if (S.tabsLoaded[t]) {
+    S.orders = S.orders.filter(function (o) { return o.tab !== t || o.written; });
+    delete S.tabsLoaded[t]; render(); return;
+  }
+  S.tabsLoaded[t] = 'loading';
+  toast('Đang tải tab ' + t + '…', 1500);
+  api('source', { tab: t, invoiceTab: S.invoiceTab }).then(function (r) {
+    S.tabsLoaded[t] = true;
+    r.orders.forEach(function (o) { S.orders.push(newOrder(o)); });
+    if (!r.orders.length) toast('Tab ' + t + ' không có đơn.');
+    render();
+  }).catch(function (e) { delete S.tabsLoaded[t]; render(); toast('Lỗi: ' + e.message, 6000); });
+}
+
+/* ===================== Ghi vào bảng kê ===================== */
+function write() {
+  var sel = S.orders.filter(function (o) { return o.include && !o.written; });
+  if (!sel.length || S.busy) return;
+  if (!/^\d{1,2}[.\/]\d{1,2}$/.test(S.invoiceTab)) { toast('Tên tab chưa đúng (ví dụ 19.11).'); return; }
+  var bad = sel.filter(function (o) { return orderIssue(o); });
+  if (bad.length) { toast('Đơn "' + bad[0].name + '": ' + orderIssue(bad[0]), 5000); bad[0].open = true; render(); return; }
+  var mm = sel.filter(mismatch), dp = sel.filter(function (o) { return o.dupTabs && o.dupTabs.length; });
+  var msg = 'Ghi ' + sel.length + ' đơn vào tab ' + S.invoiceTab + '?';
+  if (mm.length) msg += '\n\n⚠ ' + mm.length + ' đơn có tổng hóa đơn khác tiền thu hộ.';
+  if (dp.length) msg += '\n⚠ ' + dp.length + ' đơn có SĐT đã xuất hóa đơn gần đây.';
+  if (!confirm(msg)) return;
+  S.busy = true; refreshBar();
+  var payload = sel.map(function (o) {
+    return { name: o.name, phone: o.phone, addr: o.addr, cod: o.cod, sp: o.sp, tien: o.tien, dg: o.dg, ship: o.ship, ghichu: o.ghichu, sku: o.sku, kg: o.kg,
+      lines: effLines(o).map(function (l) { return { product: l.product, unit: l.unit, qty: Number(l.qty), price: l.gift ? 0 : Number(l.price), gift: !!l.gift }; }) };
+  });
+  api('append', { invoiceTab: S.invoiceTab, orders: payload }).then(function (r) {
+    sel.forEach(function (o) { o.written = true; o.include = false; o.open = false; });
+    if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
+    S.busy = false; render();
+    toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
+    cfg.lastUrl = r.url; save();
+  }).catch(function (e) { S.busy = false; refreshBar(); toast('Lỗi: ' + e.message, 8000); });
+}
+
+/* ===================== Cài đặt, thêm tay, khởi động ===================== */
+function openSettings() {
+  $('cfgUrl').value = cfg.url || ''; $('cfgKey').value = cfg.key || '';
+  $('srcNow').textContent = S.init ? 'Đang dùng: ' + S.init.sourceTitle : '';
+  $('mSettings').classList.add('show');
+}
+$('btnSettings').onclick = openSettings;
+$('cfgClose').onclick = function () { $('mSettings').classList.remove('show'); };
+$('cfgSave').onclick = function () {
+  cfg.url = $('cfgUrl').value.trim(); cfg.key = $('cfgKey').value; save();
+  $('mSettings').classList.remove('show'); start();
+};
+$('srcSave').onclick = function () {
+  var u = $('srcUrl').value.trim(); if (!u) return;
+  api('setSource', { url: u }).then(function (r) {
+    toast('Đã đổi file nguồn: ' + r.sourceTitle); $('srcUrl').value = ''; $('mSettings').classList.remove('show');
+    S.orders = S.orders.filter(function (o) { return o.written; }); S.tabsLoaded = {}; start();
+  }).catch(function (e) { toast('Lỗi: ' + e.message, 7000); });
+};
+$('mnClose').onclick = function () { $('mManual').classList.remove('show'); };
+$('mnAdd').onclick = function () {
+  var name = $('mnName').value.trim(), phone = $('mnPhone').value.trim();
+  if (!name || !phone) { toast('Cần tên và số điện thoại.'); return; }
+  var cod = digits($('mnCod').value), kg = Number(String($('mnKg').value).replace(',', '.'));
+  S.orders.push(newOrder({ tab: '', name: name, phone: phone, addr: $('mnAddr').value.trim(), cod: cod, sp: $('mnSp').value.trim(),
+    tien: digits($('mnTien').value), dg: '', ship: $('mnShip').value.trim(), ghichu: '', sku: $('mnSku').value.trim().toUpperCase(), kg: isNaN(kg) ? '' : kg }));
+  ['mnName','mnPhone','mnAddr','mnCod','mnTien','mnSp','mnShip','mnSku','mnKg'].forEach(function (id) { $(id).value = ''; });
+  $('mManual').classList.remove('show'); render();
+};
+$('btnWrite').onclick = write;
+$('mSettings').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
+$('mManual').addEventListener('click', function (e) { if (e.target === this) this.classList.remove('show'); });
+
+function start() {
+  S.init = null; render();
+  if (!cfg.url || !cfg.key) return;
+  api('init').then(function (r) {
+    S.init = r; if (!S.invoiceTab) S.invoiceTab = r.today; render();
+  }).catch(function (e) { $('main').innerHTML = '<div class="card"><h2>Không kết nối được</h2><p>' + esc(e.message) + '</p><button class="btn" id="retry">Thử lại</button> <button class="btn sec" id="goSet2" style="margin-top:8px">Cài đặt</button></div>'; $('retry').onclick = start; $('goSet2').onclick = openSettings; });
+}
+start();
+</script>
+</body>
+</html>
