@@ -197,6 +197,9 @@ function render() {
 
   var existing = S.init.invoiceTabs.indexOf(S.invoiceTab) >= 0;
   var h = '';
+  var openUrl = S.lastUrl || S.init.invoiceUrl;
+  if (S.lastUrl) h += '<div class="card" style="background:#eef6f0"><h2>✓ Đã ghi xong</h2><p style="margin:0 0 10px">Đã ghi vào tab <b>' + esc(S.lastTab) + '</b> trong file "DANH SÁCH XUẤT HÓA ĐƠN khách lẻ".</p><a class="btn" style="display:block;text-align:center;text-decoration:none" href="' + esc(S.lastUrl) + '" target="_blank" rel="noopener">Mở bảng kê tab ' + esc(S.lastTab) + '</a></div>';
+  else if (openUrl) h += '<a class="btn sec" style="display:block;text-align:center;text-decoration:none;margin-bottom:12px" href="' + esc(openUrl) + '" target="_blank" rel="noopener">Mở file bảng kê hóa đơn</a>';
   h += '<div class="card"><h2>1. Tab hóa đơn</h2><input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm">';
   h += '<div class="hint">' + (existing ? 'Tab đã có – đơn mới được nối tiếp phía dưới.' : 'Chưa có tab này – sẽ tự tạo (nhân bản từ tab gần nhất) khi ghi.') + '</div></div>';
 
@@ -341,7 +344,7 @@ function write() {
   api('append', { invoiceTab: S.invoiceTab, orders: payload }).then(function (r) {
     sel.forEach(function (o) { o.written = true; o.include = false; o.open = false; });
     if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
-    S.busy = false; render();
+    S.busy = false; S.lastUrl = r.url; S.lastTab = r.tab; render(); window.scrollTo(0, 0);
     toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
     cfg.lastUrl = r.url; save();
   }).catch(function (e) { S.busy = false; refreshBar(); toast('Lỗi: ' + e.message, 8000); });
