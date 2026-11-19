@@ -550,7 +550,8 @@ function money(n) { return fmt(Math.round(n || 0)) + ' ₫'; }
 function renderPending() {
   var el = $('pendingBar'); if (!el) return;
   if (!S.init) { el.className = 'screen-hidden'; return; }
-  var p = S.init.pending || [];
+  if (!Array.isArray(S.init.pending)) { el.className = 'screen-hidden'; return; }   // backend cũ chưa có trạng thái xuất
+  var p = S.init.pending;
   if (!p.length) { el.className = 'exp-bar ok'; el.innerHTML = '✓ Tất cả tab hóa đơn đã xuất'; return; }
   el.className = 'exp-bar bad';
   el.innerHTML = '<div class="exp-title">⚠ CHƯA XUẤT HÓA ĐƠN · ' + p.length + ' tab</div><div class="exp-list">' +
