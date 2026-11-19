@@ -1,0 +1,17 @@
+{
+  "name": "Bảng kê hóa đơn khách lẻ",
+  "short_name": "Hóa đơn lẻ",
+  "description": "Lập bảng kê xuất hóa đơn khách lẻ hằng ngày - Trà Mộc Sinh / An Maitri",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fcf8ed",
+  "theme_color": "#3d6b2d",
+  "lang": "vi",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
