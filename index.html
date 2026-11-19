@@ -496,7 +496,12 @@ function api(action, data) {
   if (!cfg.url || !cfg.key) return Promise.reject(new Error('Chưa cài đặt API.'));
   var body = Object.assign({ key: cfg.key, action: action }, data || {});
   return fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
-    .then(function (r) { return r.json(); })
+    .then(function (r) { return r.text(); })
+    .then(function (t) {
+      try { return JSON.parse(t); } catch (e) {
+        throw new Error(/^\s*</.test(t) ? 'Google đang yêu cầu đăng nhập thay vì trả dữ liệu. Vào Apps Script → Deploy → Manage deployments → Edit: "Execute as" = Me, "Who has access" = Anyone, rồi Deploy New version.' : 'Phản hồi không hợp lệ từ Apps Script.');
+      }
+    })
     .then(function (j) { if (!j.ok) throw new Error(j.error || 'Lỗi không xác định'); return j; });
 }
 
@@ -1377,9 +1382,18 @@ $('main').addEventListener('input', function (e) { if (e.target.id === 'dateSear
 function start() {
   S.init = null; render();
   if (!cfg.url || !cfg.key) return;
+  var CK = 'amt_init_cache_v1', cached = null;
+  try { cached = JSON.parse(localStorage.getItem(CK) || 'null'); } catch (e) {}
+  if (cached && cached.today && Array.isArray(cached.products)) {      // hiện ngay bản lưu lần trước, cập nhật ngầm bên dưới
+    S.init = cached; if (!S.invoiceTab) S.invoiceTab = cached.today; S.fromCache = true; render();
+  }
   api('init').then(function (r) {
-    S.init = r; if (!S.invoiceTab) S.invoiceTab = r.today; render(); loadStock(); loadCounts();
-  }).catch(function (e) { setChrome(false); $('main').innerHTML = '<section class="panel section"><div class="empty"><span class="empty-illustration">' + ICON('info') + '</span><strong>Không kết nối được</strong><p>' + esc(e.message) + '</p><div class="row" style="margin-top:14px;width:100%;max-width:340px"><button class="primary" id="retry" type="button">Thử lại</button><button class="secondary" id="goSet2" type="button">Cài đặt</button></div></div></section>'; $('retry').onclick = start; $('goSet2').onclick = openSettings; });
+    S.fromCache = false;
+    try { localStorage.setItem(CK, JSON.stringify(r)); } catch (e) {}
+    var keep = S.invoiceTab, was = cached && cached.today; S.init = r; S.invoiceTab = (keep && keep !== was) ? keep : r.today; render(); renderPending(); loadStock(); loadCounts();
+  }).catch(function (e) {
+    if (S.init && S.fromCache) { toast('Chưa cập nhật được dữ liệu mới: ' + e.message, 8000); return; }
+    setChrome(false); $('main').innerHTML = '<section class="panel section"><div class="empty"><span class="empty-illustration">' + ICON('info') + '</span><strong>Không kết nối được</strong><p>' + esc(e.message) + '</p><div class="row" style="margin-top:14px;width:100%;max-width:340px"><button class="primary" id="retry" type="button">Thử lại</button><button class="secondary" id="goSet2" type="button">Cài đặt</button></div></div></section>'; $('retry').onclick = start; $('goSet2').onclick = openSettings; });
 }
 start();
 </script>
