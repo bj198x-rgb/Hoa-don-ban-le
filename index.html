@@ -304,6 +304,60 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#5c9a46;box-shado
 .os{padding:0 13px 13px}.os .cols{margin-top:0;padding:10px 0 2px;border-top:1px dashed #d9e5d3}.os .tag{margin-top:8px}.oh{padding-bottom:10px}
 .date-main small b{font-weight:800;color:#25491b}.date-card.done small b{color:#fff}
 .cbo.add{color:var(--pine);font-weight:700;background:#f4f9f1;position:sticky;bottom:0;border-top:1px solid #dbe8d5}
+
+/* ===== Trạng thái xuất hóa đơn ===== */
+.exp-bar{border-radius:16px;padding:12px 14px;margin:14px 0 14px;font-weight:700}
+.exp-bar.bad{background:#fee2e2;border:2px solid #ef4444;color:#991b1b;box-shadow:0 4px 0 #fca5a5}
+.exp-bar.ok{background:#e8f6e4;border:2px solid #9fd093;color:#245c1c;font-size:14px;padding:9px 14px}
+.exp-title{font-size:15px;font-weight:850;letter-spacing:.2px;margin-bottom:8px}
+.exp-list{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.exp-item{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #fca5a5;border-radius:12px;padding:5px 6px 5px 10px}
+.etab{display:inline-flex;align-items:center;gap:5px;font-weight:850;font-size:15px;border-radius:10px;padding:7px 12px;border:2px solid;white-space:nowrap}
+.etab.bad{background:#fee2e2;border-color:#ef4444;color:#b91c1c}
+.etab.good{background:#e8f6e4;border-color:#8cc47e;color:#245c1c}
+.etab.sel{box-shadow:0 0 0 3px #3d6b2d55}
+.exp-item .etab{border:0;background:transparent;padding:0 2px;font-size:17px}
+.exp-btn{border:0;border-bottom:3px solid #14532d;background:#16a34a;color:#fff;font-weight:800;font-size:13px;border-radius:10px;height:38px;padding:0 12px;white-space:nowrap}
+.exp-btn:active{transform:translateY(2px);border-bottom-width:1px}
+.etabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+button.etab{background-clip:padding-box}
+/* ===== Nổi bật nút bấm & tên đầu mục ===== */
+.workspace-tab{border:2px solid #b9d2ae;color:#2a5a1f;font-weight:800;font-size:15px;box-shadow:0 4px 0 #cfe0c6}
+.workspace-tab:active{transform:translateY(3px);box-shadow:0 1px 0 #cfe0c6}
+.workspace-tab.active{background:linear-gradient(180deg,#4f9139,#356a26);border-color:#2b5a1e;color:#fff;box-shadow:0 5px 0 #234a18,0 10px 18px rgba(35,70,25,.25)}
+.workspace-tab.active:active{box-shadow:0 1px 0 #234a18}
+.workspace-tab.active .tab-ico{background:rgba(255,255,255,.22);color:#fff}
+.heading h3{font-size:19px;font-weight:800;color:#1b3f12;letter-spacing:-.4px}
+.heading p{font-size:13px;color:#587050}
+.step-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(180deg,#4f9139,#356a26);color:#fff;box-shadow:0 3px 0 #234a18}
+.step-icon svg{width:22px;height:22px}
+.step-tag{background:#356a26;color:#fff;font-weight:800;font-size:12px;padding:7px 11px;border-radius:9px}
+.field-label{font-size:13.5px;font-weight:800;color:#1f4616}
+.intro h2,.stock-head h2{font-size:23px;font-weight:800;color:#1b3f12}
+.eyebrow{font-size:11px;color:#2f6b25;font-weight:800}
+.progress-txt strong{font-size:13px;font-weight:800;color:#1b3f12}
+.progress-txt span{font-size:11px;color:#5f7a54}
+.progress-bubble{width:35px;height:35px;border:2px solid #b9d2ae;color:#2a5a1f;font-weight:800}
+.progress-bubble.on{border-color:#2b5a1e}
+.source-list-title span{font-weight:800;font-size:15px;color:#1b3f12}
+.primary,.btn{height:52px;font-size:16px;font-weight:800;border-radius:14px;background:linear-gradient(180deg,#4f9139,#356a26);border-bottom:4px solid #234a18;box-shadow:0 8px 14px rgba(35,74,24,.25)}
+.primary:active:not(:disabled),.btn:active:not(:disabled){transform:translateY(3px);border-bottom-width:1px;box-shadow:0 2px 4px rgba(35,74,24,.25)}
+.primary:disabled,.btn:disabled{border-bottom-color:#9db592}
+.btn.sec,.secondary{background:#fff;color:#2a5a1f;border:2px solid #7fae6f;border-bottom-width:4px;box-shadow:none;font-weight:800}
+.small-btn{height:46px;font-size:14px;font-weight:800;border:2px solid #7fae6f;border-bottom-width:4px;background:#fff;color:#2a5a1f;border-radius:13px}
+.small-btn:active{transform:translateY(2px);border-bottom-width:2px}
+.chip{font-weight:800;color:#2a5a1f}.chip.on{background:var(--pine);color:#fff;box-shadow:0 3px 0 #234a18}
+.date-card{border:2px solid #bcd3b3}
+.mobile-bottom .primary{height:56px;font-size:17px}
+@media(max-width:600px){
+  .workspace-tab{font-size:14px;padding:0 4px;height:52px}
+  .heading h3{font-size:18px}
+  .intro h2,.stock-head h2{font-size:21px}
+  .exp-title{font-size:14px}
+  .progress-bubble{width:30px;height:30px;border-radius:10px}
+  .progress-txt strong{font-size:12px}.progress-txt span{font-size:10.5px}
+  .progress-item,.progress-step{gap:6px}
+}
 </style>
 </head>
 <body>
@@ -338,6 +392,7 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#5c9a46;box-shado
     <button class="workspace-tab" id="tabStock" type="button"><span class="tab-ico"><svg class="icon"><use href="#i-box"/></svg></span>Tồn kho<span class="bdg" id="stockBdg"></span></button>
     <button class="workspace-tab" id="tabReport" type="button"><span class="tab-ico"><svg class="icon"><use href="#i-chart"/></svg></span>Báo cáo</button>
   </nav>
+  <div id="pendingBar" class="screen-hidden"></div>
 
   <div id="invoiceScreen" class="workspace">
     <main class="main-col" id="main"></main>
@@ -492,7 +547,28 @@ function todayLong() { var d = new Date(); return ('0' + d.getDate()).slice(-2) 
 function tabOk() { return /^\d{1,2}[.\/]\d{1,2}$/.test(S.invoiceTab); }
 function selected() { return S.orders.filter(function (o) { return o.include && !o.written; }); }
 function money(n) { return fmt(Math.round(n || 0)) + ' ₫'; }
+function renderPending() {
+  var el = $('pendingBar'); if (!el) return;
+  if (!S.init) { el.className = 'screen-hidden'; return; }
+  var p = S.init.pending || [];
+  if (!p.length) { el.className = 'exp-bar ok'; el.innerHTML = '✓ Tất cả tab hóa đơn đã xuất'; return; }
+  el.className = 'exp-bar bad';
+  el.innerHTML = '<div class="exp-title">⚠ CHƯA XUẤT HÓA ĐƠN · ' + p.length + ' tab</div><div class="exp-list">' +
+    p.slice(0, 8).map(function (t) { return '<div class="exp-item"><span class="etab">' + esc(t) + '</span><button class="exp-btn" type="button" data-exp="' + esc(t) + '">✓ Đã xuất</button></div>'; }).join('') +
+    (p.length > 8 ? '<span class="muted">+' + (p.length - 8) + ' tab khác</span>' : '') + '</div>';
+}
+function setExportedTabs(tabs, exported) {
+  return api('setExported', { tabs: tabs, exported: exported }).then(function (r) {
+    S.init.pending = r.pending; renderPending(); render();
+    toast(exported ? 'Đã đánh dấu ĐÃ xuất: ' + tabs.join(', ') : 'Đã đánh dấu CHƯA xuất: ' + tabs.join(', '));
+  }).catch(function (e) { toast('Lỗi: ' + e.message, 7000); });
+}
+$('pendingBar').addEventListener('click', function (e) {
+  var t = e.target.closest ? e.target.closest('[data-exp]') : null; if (!t) return;
+  setExportedTabs([t.getAttribute('data-exp')], true);
+});
 function setChrome(on) {
+  if (!on) $('pendingBar').className = 'screen-hidden'; else renderPending();
   $('side').classList.toggle('screen-hidden', !on);
   $('bar').classList.toggle('screen-hidden', !on || S.screen !== 'invoice');
 }
@@ -544,6 +620,11 @@ function render() {
   h += '<section class="panel section"><div class="section-header"><div class="heading"><span class="step-icon">' + ICON('clipboard') + '</span><div><h3>Tab hóa đơn</h3><p>Đặt tên tab để lưu các đơn hàng</p></div></div><span class="step-tag">Bước 01</span></div>';
   h += '<label class="field-label" for="invTab" style="margin-top:0">Tên tab hóa đơn</label><div class="input-row">' + ICON('list') + '<input id="invTab" value="' + esc(S.invoiceTab) + '" inputmode="decimal" placeholder="dd.mm" autocomplete="off"></div>';
   h += '<div class="hint">' + ICON('info') + (existing ? 'Tab đã có – đơn mới được nối tiếp phía dưới.' : 'Chưa có tab này – sẽ tự tạo (nhân bản từ tab gần nhất) khi ghi.') + '</div>';
+  var pend = S.init.pending || [], tabsRecent = S.init.invoiceTabs.slice();
+  if (tabsRecent.indexOf(S.invoiceTab) < 0 && existing === false && pend.indexOf(S.invoiceTab) >= 0) tabsRecent.unshift(S.invoiceTab);
+  h += '<label class="field-label" style="margin-top:16px">Các tab gần đây</label><div class="muted" style="font-size:12px;margin:-4px 0 8px">Đỏ = chưa xuất hóa đơn · Xanh = đã xuất</div><div class="etabs">' +
+    tabsRecent.map(function (t) { var bad = pend.indexOf(t) >= 0; return '<button type="button" class="etab ' + (bad ? 'bad' : 'good') + (t === S.invoiceTab ? ' sel' : '') + '" data-pick="' + esc(t) + '">' + (bad ? '⚠ ' : '✓ ') + esc(t) + '</button>'; }).join('') + '</div>';
+  if (existing) { var isPend = pend.indexOf(S.invoiceTab) >= 0; h += '<div class="section-tools" style="margin:12px 0 0"><button class="small-btn" type="button" data-expsel="' + (isPend ? '1' : '0') + '">' + (isPend ? '✓ Đánh dấu tab ' + esc(S.invoiceTab) + ' ĐÃ xuất' : 'Đánh dấu tab ' + esc(S.invoiceTab) + ' CHƯA xuất') + '</button></div>'; }
   if (openUrl) h += '<div class="section-tools" style="margin:14px 0 0"><a class="small-btn" href="' + esc(openUrl) + '" target="_blank" rel="noopener">' + ICON('link') + 'Mở file bảng kê hóa đơn</a></div>';
   h += '</section>';
 
@@ -718,6 +799,7 @@ function write() {
     });
     save();
     if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
+    if (r.pending) { S.init.pending = r.pending; renderPending(); }
     S.busy = false; S.lastUrl = r.url; S.lastTab = r.tab; render(); window.scrollTo(0, 0);
     toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
     cfg.lastUrl = r.url; save(); loadStock(true);
@@ -1280,12 +1362,14 @@ function loadCounts(refresh) {
   return api('counts', { refresh: !!refresh }).then(function (r) { S.counts = r.counts || {}; var g = $('dateGrid'); if (g) g.innerHTML = tabGridHtml(); }).catch(function () {});
 }
 function reloadInit() {
-  api('init').then(function (r) { S.init.sourceTabs = r.sourceTabs; S.init.invoiceTabs = r.invoiceTabs; S.init.products = r.products; S.init.boxes = r.boxes; S.init.units = r.units; S.init.productUnits = r.productUnits; render(); loadCounts(true); toast('Đã cập nhật danh sách tab và sản phẩm.'); })
+  api('init').then(function (r) { S.init.sourceTabs = r.sourceTabs; S.init.invoiceTabs = r.invoiceTabs; S.init.products = r.products; S.init.boxes = r.boxes; S.init.units = r.units; S.init.productUnits = r.productUnits; S.init.pending = r.pending; renderPending(); render(); loadCounts(true); toast('Đã cập nhật danh sách tab và sản phẩm.'); })
     .catch(function (e) { toast('Lỗi: ' + e.message, 6000); });
 }
 $('main').addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('.date-card[data-tab]'); if (b) { toggleTab(b.getAttribute('data-tab')); return; }
   if (e.target.closest && e.target.closest('#reloadTabs')) reloadInit();
+  var pk = e.target.closest ? e.target.closest('[data-pick]') : null; if (pk) { S.invoiceTab = pk.getAttribute('data-pick'); render(); return; }
+  var xs = e.target.closest ? e.target.closest('[data-expsel]') : null; if (xs) setExportedTabs([S.invoiceTab], xs.getAttribute('data-expsel') === '1');
 });
 $('main').addEventListener('input', function (e) { if (e.target.id === 'dateSearch') { S.tabQ = e.target.value; $('dateGrid').innerHTML = tabGridHtml(); } });
 
