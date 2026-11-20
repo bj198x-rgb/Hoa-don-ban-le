@@ -24,6 +24,7 @@ h1,h2,h3,p{margin:0}svg{width:20px;height:20px;flex-shrink:0}
 .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.85}
 .screen-hidden{display:none!important}
 .muted{color:var(--muted);font-size:12px}
+.empty-warn{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:#fff4e0;border:1px solid #f0c987;color:#7a4a00;font-size:13.5px;line-height:1.45}.empty-warn b{font-size:14px}
 .center{text-align:center;color:var(--muted);padding:28px 0}
 
 /* ===== Đầu trang ===== */
@@ -688,7 +689,11 @@ function setChrome(on) {
 }
 function tabGridHtml() {
   var q = norm(S.tabQ || ''), tabs = srcTabs().filter(function (t) { return !q || norm(t).indexOf(q) >= 0; });
-  if (!tabs.length) return '<p class="muted" style="grid-column:1/-1;padding:10px 2px">Không tìm thấy tab phù hợp.</p>';
+  if (!tabs.length) {
+    var all = srcTabs().length;
+    return '<div class="empty-warn" role="alert"><b>⚠ ' + (all ? 'Không có tab nào khớp “' + esc(S.tabQ || '') + '”.' : 'Chưa có tab nguồn nào.') + '</b><span>' +
+      (all ? 'Kiểm tra lại cách gõ (ví dụ 18.11) hoặc xóa ô tìm kiếm để xem đủ ' + all + ' tab.' : 'Bấm “Làm mới”; nếu vẫn trống, kiểm tra kết nối mạng, đường dẫn Apps Script trong Cài đặt (⚙) và tên file/tab nguồn.') + '</span></div>';
+  }
   return tabs.map(function (t) {
     var ts = tabState(t), loaded = S.tabsLoaded[t], cls = ts.st === 'done' ? ' done' : ts.st === 'part' ? ' part' : loaded ? ' selected' : '', sub, ic = 'arrow';
     if (loaded === 'loading') sub = 'Đang tải…';
