@@ -261,6 +261,8 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:#5c9a46;box-shado
 .st-table .nm small{display:block;color:#7f9276;font-size:11.5px;margin-top:2px;line-height:1.45}
 .st-table tfoot td{font-weight:760;background:#f8fbf6}
 .tag.info{background:#dbeafe;color:#1d4ed8}
+.tag.big{font-size:12px;padding:4px 10px;letter-spacing:.2px}.tag.pend{background:#fff1c2;color:#8a5a00}
+.flt{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}.flt button{border:2px solid #cfe0c8;background:#fff;color:#2f5a22;border-radius:12px;padding:9px 14px;font-weight:800;font-size:14px;cursor:pointer}.flt button.on{background:#3d6b2d;color:#fff;border-color:#3d6b2d}.flt button.todo.on{background:#b45309;border-color:#b45309}
 @media(max-width:700px){
   .st-table thead{display:none}
   .st-table,.st-table tbody,.st-table tfoot,.st-table tr,.st-table td{display:block}
@@ -655,8 +657,8 @@ function tabGridHtml() {
   return tabs.map(function (t) {
     var ts = tabState(t), loaded = S.tabsLoaded[t], cls = ts.st === 'done' ? ' done' : ts.st === 'part' ? ' part' : loaded ? ' selected' : '', sub, ic = 'arrow';
     if (loaded === 'loading') sub = 'Đang tải…';
-    else if (ts.st === 'done') { sub = 'Đã lấy xong ' + ts.n + '/' + ts.total; ic = 'check'; }
-    else if (ts.st === 'part') sub = 'Đã ghi ' + ts.n + (ts.total ? '/' + ts.total : '');
+    else if (ts.st === 'done') { sub = '✓ Đã xuất hết ' + ts.n + '/' + ts.total; ic = 'check'; }
+    else if (ts.st === 'part') sub = '✓ Đã xuất <b>' + ts.n + '</b>' + (ts.total ? '/' + ts.total + ' · <b style="color:#b45309">còn ' + Math.max(ts.total - ts.n, 0) + ' chưa xuất</b>' : '');
     else if (loaded) { sub = 'Đã tải ' + S.orders.filter(function (o) { return o.tab === t; }).length + ' đơn'; ic = 'check'; }
     else sub = 'Chưa lấy' + (curCounts()[t] != null ? ' · <b>' + curCounts()[t] + ' đơn</b>' : '');
     return '<button class="date-card' + cls + '" type="button" data-tab="' + esc(t) + '" aria-pressed="' + (loaded === true) + '"><span class="date-main"><strong>' + esc(t) + '</strong><small>' + sub + '</small></span>' + ICON(ic) + '</button>';
@@ -719,10 +721,12 @@ function render() {
   h += '<section class="panel section"><div class="section-header"><div class="heading"><span class="step-icon">' + ICON('check') + '</span><div><h3>Kiểm tra đơn hàng</h3><p>Chọn các đơn cần đưa vào bảng kê</p></div></div><span class="step-tag" id="selectedBadge">' + sel.length + ' đơn đã chọn</span></div>';
   if (!list.length) h += '<div class="empty"><span class="empty-illustration">' + ICON('clipboard') + '</span><strong>Chưa có đơn nào</strong><p>Chạm vào tab ở bước 2 để lấy đơn hoặc thêm đơn thủ công.</p></div>';
   else {
-    var avail = list.filter(function (o) { return !o.written; }), allOn = avail.length && avail.every(function (o) { return o.include; });
+    var avail = list.filter(function (o) { return !o.written && !o.prev; }), allOn = avail.length && avail.every(function (o) { return o.include; });
+    var nDone = list.filter(function (o) { return o.written || o.prev; }).length, nTodo = list.length - nDone, flt = S.flt || 'all';
     h += '<div class="small-note"><b>Lưu ý:</b> ô sản phẩm viền cam là gợi ý theo mã hàng – hãy kiểm tra lại trước khi ghi.</div>';
     h += '<div class="source-list-title"><span>Danh sách đơn (' + list.length + ')</span><button class="small-btn" type="button" id="selAll" style="height:34px">' + (allOn ? 'Bỏ chọn tất cả' : 'Chọn tất cả') + '</button></div><div class="order-list">';
-    list.forEach(function (o) { h += orderHtml(o); });
+    h += '<div class="flt"><button type="button" data-flt="all" class="' + (flt === 'all' ? 'on' : '') + '">Tất cả (' + list.length + ')</button><button type="button" data-flt="todo" class="todo ' + (flt === 'todo' ? 'on' : '') + '">○ Chưa xuất (' + nTodo + ')</button><button type="button" data-flt="done" class="' + (flt === 'done' ? 'on' : '') + '">✓ Đã xuất (' + nDone + ')</button></div>';
+    list.filter(function (o) { var d = o.written || o.prev; return flt === 'all' || (flt === 'done' ? d : !d); }).forEach(function (o) { h += orderHtml(o); });
     h += '</div>';
   }
   h += '</section>';
@@ -733,9 +737,9 @@ function render() {
 
 function orderHtml(o) {
   var iss = orderIssue(o), mm = mismatch(o);
-  var h = '<div class="ord' + (o.include ? '' : ' off') + (o.written ? ' done' : '') + (iss ? ' bad' : mm ? ' warn' : '') + '" data-u="' + o.uid + '">';
+  var h = '<div class="ord' + (o.include ? '' : ' off') + ((o.written || o.prev) ? ' done' : '') + (iss ? ' bad' : mm ? ' warn' : '') + '" data-u="' + o.uid + '">';
   h += '<div class="oh"><input type="checkbox" data-a="inc"' + (o.include && !o.written ? ' checked' : '') + (o.written ? ' disabled' : '') + '>';
-  h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok">đã ghi</span>' : o.prev ? '<span class="tag ok">đã ghi trước đó</span>' : '');
+  h += '<div class="t" data-a="open"><div class="n">' + esc(o.name) + (o.written ? '<span class="tag ok big">✓ ĐÃ XUẤT</span>' : o.prev ? '<span class="tag ok big">✓ ĐÃ XUẤT' + (o.doneInv ? ' · tab ' + esc(o.doneInv) : '') + (o.doneAt ? ' · ' + esc(o.doneAt) : '') + '</span>' : '<span class="tag pend big">○ CHƯA XUẤT</span>');
   if (o.dupTabs && o.dupTabs.length) h += '<span class="tag warn">SĐT đã có ở tab ' + esc(o.dupTabs.join(', ')) + '</span>';
   h += '</div><div class="p">' + esc(o.phone) + ' · Thu hộ ' + (o.cod === '' ? '—' : fmt(o.cod)) + ' · ' + esc(o.tab || 'tay') + '</div>' +
     (provinceOf(o.addr) ? '<div class="prov">📍 ' + esc(provinceOf(o.addr)) + '</div>' : '') + '</div>';
@@ -797,7 +801,8 @@ function bind() {
   if (inv) inv.onchange = function () { render(); loadStock(); };
   var cd = $('clrDone'); if (cd) cd.onclick = function () { if (confirm('Xóa đánh dấu "đã lấy xong" của tất cả tab trong file nguồn này?')) { cfg.done = cfg.done || {}; delete cfg.done[S.init.sourceTitle]; save(); render(); } };
   var am = $('addManual'); if (am) am.onclick = function () { $('mManual').classList.add('show'); };
-  var sa = $('selAll'); if (sa) sa.onclick = function () { var av = S.orders.filter(function (o) { return !o.written; }), on = av.every(function (o) { return o.include; }); av.forEach(function (o) { o.include = !on; }); render(); };
+  var sa = $('selAll'); if (sa) sa.onclick = function () { var av = S.orders.filter(function (o) { return !o.written && !o.prev; }), on = av.every(function (o) { return o.include; }); av.forEach(function (o) { o.include = !on; }); render(); };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-flt]'), function (b) { b.onclick = function () { S.flt = b.getAttribute('data-flt'); render(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('.ord'), function (el) {
     var o = find(el.getAttribute('data-u'));
     el.addEventListener('click', function (ev) {
@@ -832,8 +837,9 @@ function bind() {
 function doneStore() { var k = S.xl ? S.xl.base : S.init.sourceTitle; cfg.done = cfg.done || {}; cfg.done[k] = cfg.done[k] || {}; return cfg.done[k]; }
 function rowKey(o) { return o.tab && o.row ? o.tab + '|' + o.row : ''; }
 function tabState(t) {
-  var rec = doneStore()[t]; if (!rec || !rec.rows.length) return { st: 'none' };
-  var n = rec.rows.length, total = curCounts()[t] != null ? curCounts()[t] : (rec.total || 0);
+  var rec = doneStore()[t], srv = (S.srvDone && S.srvDone[t]) || 0, n = Math.max(rec ? rec.rows.length : 0, srv);
+  if (!n) return { st: 'none' };
+  var total = curCounts()[t] != null ? curCounts()[t] : ((rec && rec.total) || 0);
   return total && n >= total ? { st: 'done', n: n, total: total } : { st: 'part', n: n, total: total };
 }
 
@@ -961,7 +967,8 @@ function toggleTab(t) {
     var st = doneStore(), rec = st[t] = st[t] || { rows: [], total: 0, at: 0 }; rec.total = r.orders.length; save();
     r.orders.forEach(function (o) {
       var ord = newOrder(o), k = rowKey(ord);
-      if (k && rec.rows.indexOf(k) >= 0) { ord.include = false; ord.prev = true; }
+      if (o.done) { ord.include = false; ord.prev = true; ord.doneInv = o.done.inv; ord.doneAt = o.done.at; }
+      else if (k && rec.rows.indexOf(k) >= 0) { ord.include = false; ord.prev = true; }
       S.orders.push(ord);
     });
     if (!r.orders.length) toast('Tab ' + t + ' không có đơn.');
@@ -983,12 +990,13 @@ function write() {
   if (!confirm(msg)) return;
   S.busy = true; refreshBar();
   var payload = sel.map(function (o) {
-    return { name: o.name, phone: o.phone, addr: o.addr, cod: o.cod, sp: o.sp, tien: o.tien, dg: o.dg, ship: o.ship, ghichu: o.ghichu, sku: o.sku, kg: o.kg,
+    return { name: o.name, phone: o.phone, addr: o.addr, cod: o.cod, sp: o.sp, tien: o.tien, dg: o.dg, ship: o.ship, ghichu: o.ghichu, sku: o.sku, kg: o.kg, srcTab: o.tab || '', srcRow: o.row || 0,
       lines: effLines(o).map(function (l) { return { product: l.product, unit: l.unit, qty: Number(l.qty), price: l.gift ? 0 : Number(l.price), gift: !!l.gift }; }) };
   });
   api('append', { invoiceTab: S.invoiceTab, orders: payload }).then(function (r) {
     sel.forEach(function (o) {
       o.written = true; o.include = false; o.open = false;
+      if (o.tab && o.row) { S.srvDone = S.srvDone || {}; S.srvDone[o.tab] = (S.srvDone[o.tab] || 0) + 1; }
       var k = rowKey(o); if (k) { var st = doneStore(), rec = st[o.tab] = st[o.tab] || { rows: [], total: 0, at: 0 }; if (rec.rows.indexOf(k) < 0) rec.rows.push(k); rec.at = Date.now(); }
     });
     save();
@@ -1690,7 +1698,7 @@ $('apAdd').onclick = function () {
   }).catch(function (e) { b.disabled = false; toast('Lỗi: ' + e.message, 7000); });
 };
 function loadCounts(refresh) {
-  return api('counts', { refresh: !!refresh }).then(function (r) { S.counts = r.counts || {}; var g = $('dateGrid'); if (g) g.innerHTML = tabGridHtml(); }).catch(function () {});
+  return api('counts', { refresh: !!refresh }).then(function (r) { S.counts = r.counts || {}; S.srvDone = r.doneCounts || {}; var g = $('dateGrid'); if (g) g.innerHTML = tabGridHtml(); }).catch(function () {});
 }
 function reloadInit() {
   api('init').then(function (r) { S.init.sourceTabs = r.sourceTabs; S.init.invoiceTabs = r.invoiceTabs; S.init.products = r.products; S.init.boxes = r.boxes; S.init.units = r.units; S.init.productUnits = r.productUnits; S.init.pending = r.pending; renderPending(); render(); loadCounts(true); toast('Đã cập nhật danh sách tab và sản phẩm.'); })
