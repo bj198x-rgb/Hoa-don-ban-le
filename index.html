@@ -495,7 +495,7 @@ button.etab{background-clip:padding-box}
 <!-- Thêm sản phẩm mới -->
 <div class="modal" id="mAddProd"><div class="sheet">
   <h3>Thêm sản phẩm xuất hóa đơn</h3>
-  <p class="muted" style="margin-bottom:6px">Sản phẩm được thêm vào danh sách chọn (cột G) của tab hóa đơn mới nhất; các tab ngày tiếp theo tự có. Tên có chữ "carton" sẽ xếp vào nhóm hộp quà tặng.</p>
+  <p class="muted" style="margin-bottom:6px">Sản phẩm được thêm vào danh sách sản phẩm của app và dùng được ngay ở mọi tab hóa đơn. Tên có chữ "carton" sẽ xếp vào nhóm hộp quà tặng.</p>
   <label>Tên sản phẩm (đúng như muốn hiện trên hóa đơn)</label><input id="apName" autocomplete="off">
   <label>Đơn vị tính</label><input id="apUnit" list="apUnits" placeholder="VD: Chai 500ml, Kg, Hộp" autocomplete="off"><datalist id="apUnits"></datalist>
   <div class="row" style="margin-top:16px"><button class="btn" id="apAdd" type="button">Thêm sản phẩm</button><button class="btn sec" id="apClose" type="button">Hủy</button></div>
@@ -1003,7 +1003,8 @@ function write() {
     if (S.init.invoiceTabs.indexOf(r.tab) < 0) S.init.invoiceTabs.unshift(r.tab);
     if (r.pending) { S.init.pending = r.pending; renderPending(); }
     S.busy = false; S.lastUrl = r.url; S.lastTab = r.tab; render(); window.scrollTo(0, 0);
-    toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell, 8000);
+    toast('✓ Đã ghi ' + r.orders + ' đơn (' + r.rows + ' dòng) vào tab ' + r.tab + (r.created ? ' (tab mới)' : '') + '. Tổng tab: ' + r.totalCell +
+      (r.srcMarked ? ' · Đã đánh dấu ' + r.srcMarked + ' đơn "Đã xuất" vào file An Maitri VNPost' : '') + (r.srcWarn ? ' ⚠ ' + r.srcWarn : ''), 9000);
     cfg.lastUrl = r.url; save(); loadStock(true);
   }).catch(function (e) { S.busy = false; refreshBar(); toast('Lỗi: ' + e.message, 8000); });
 }
